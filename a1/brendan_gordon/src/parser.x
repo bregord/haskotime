@@ -1,16 +1,16 @@
 {
-module a1Scanner (main) where
+module Main (main) where
 }
 
 %wrapper "basic"
 
 tokens :-
-    "#".                                    ;
+    $white+                                 ;
+    "#".*                                   ;
     [\+\*\-\/]                              {\s->Op (head s)}        
-    "var"                                   { \s -> Id } --Here we extract the id from the variable.
     "="                                     { \s -> Equal }
-    (((([1-9]+[0-9]*)|(0))?)(\.))(([0-9]*)) { \s -> (read s) } --I want x., .y, or x.y
-    ([1-9][0-9]*)|(0)                      { \s -> (read s) }
+    (((([1-9]+[0-9]*)|(0))?)(\.))(([0-9]*)) { \s -> Float (read s) } --I want x., .y, or x.y
+    ([1-9][0-9]*)|(0)                       {\s -> Int (read s) }
     ";"                                     {\s->Semicolon}             
     "if"                                    { \s-> If }
     "else"                                  { \s -> Else }
@@ -21,8 +21,8 @@ tokens :-
     "float"                                 { \s-> TypeF}
     "read"                                  { \s -> Read' }
     "print"                                 { \s -> Print }
-
-
+    [a-zA-Z0-9]+                            { \s -> Id  s} --Here we extract the id from the variable.
+    
 -- Each action has type :: String -> Token
 
 {
