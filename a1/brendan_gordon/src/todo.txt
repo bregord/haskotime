@@ -1,0 +1,5 @@
+Make sure There is only one variable declaration per line
+
+All declarations are ONLY AT THE TOP
+
+No multiple assignments on each line
