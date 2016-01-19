@@ -6,6 +6,7 @@ module Main (main) where
 
 tokens :-
     $white+                                 ;
+    ":"                                     ;
     "#".*                                   ;
     [\+\*\-\/]                              {\s->Op (head s)}        
     "="                                     { \s -> Equal }
@@ -19,9 +20,12 @@ tokens :-
     "done"                                  { \s -> Done }
     "int"                                   { \s-> TypeI }
     "float"                                 { \s-> TypeF}
-    "read"                                  { \s -> Read' }
     "print"                                 { \s -> Print }
+    "read"                                  { \s -> Read' }
+    "var"                                   { \s -> Var} 
+    \"[a-zA-Z0-9\.\!\?' ']*\"               { \s-> String s }
     [a-zA-Z0-9]+                            { \s -> Id  s} --Here we extract the id from the variable.
+
     
 -- Each action has type :: String -> Token
 
@@ -29,7 +33,7 @@ tokens :-
 data Token = 
     Int Int     |
     Float Float |
-    String      |
+    String String|
     Semicolon   |
     Id String   | 
     If          |
@@ -38,6 +42,7 @@ data Token =
     Else        |
     While       |
     Done        |
+    Var         |
     TypeI       |
     TypeF       |
     Op Char     |
@@ -46,8 +51,8 @@ data Token =
     Print       
     deriving(Eq,Show)
 
-main = do
-    s <- getContents
-    print (alexScanTokens s)
-
+--main = do
+--    s <- getContents
+--    print (alexScanTokens s)
+--
 }
