@@ -1,6 +1,7 @@
 {
-module main where
-import lexer
+module A1Parser where
+import A1Lexer
+import Types
 }
 
 %name calc--name of parsing function Happy generates
@@ -34,6 +35,8 @@ import lexer
     var     { TokenVar }
     ';'     { TokenSemicolon }
     ':'     { TokenColon }
+    integer_lit   { TokenIntLiteral $$ }
+    float_lit {TokenFloatLiteral $$}
 %%
 
 --This is where I define my grammar.
@@ -41,68 +44,40 @@ import lexer
 
 Program : DeclarationsList ';' StatementList ';' { Program $1 $3}
 
-DeclarationsList : Declaration { DeclarationsList $1}
-                 | DeclarationsList ';' Declaration ';' {DeclarationsList $1 3} 
+DeclarationsList : Declaration { DeclarationsList Empty $1}
+                 | DeclarationsList ';' Declaration ';' {DeclarationsList $1 $3} 
+                    |   {Empty}
 
-Declaration : var id ':' int {Id $2} 
-            | var id ':' float {Id $2}
-            | var id ':' string {Id $2}
+Declaration : var id ':' int {DeclarationInt $2 $4}
+            | var id ':' float {DeclarationFloat $2 $4} 
+            | var id ':' string {DeclarationString $2 $4} 
+Statement : 'if' id 'then' StatementList endif {IfState $2 $4}
+            |'if' id 'then' StatementList 'else' StatementList endif {IfElseState $2 $4 $6} 
+            |while id do StatementList done {WhileState $2 $4}
+            | print '"' Line '"' {PrintState $3}
+            | read '"' Line '"'  {ReadState $3}
+            |id '=' Exp {AssnStatement $1 $3}--problem 
 
-Statement : 'if' id 'then' StatementList endif {Id $2}
-            |'if' id 'then' StatementList 'else' StatementList endif {Id #2}
-            |while id do StatementList done {Id $2}
-            | print '"' Exp '"' {Statement $3} 
-            | read '"' Exp '"' {Statement $3}
-            | Assignment {$1}   
-
-StatementList : Statement {$1} 
+StatementList : Statement {StatementList Empty $1} 
             | StatementList ';' Statement {StatementList $1 $3}
+            |   {Empty}
 
 --REMEMBER. NO MULTIPLE ASSIGNMENTS. THIS GRAMMAR CURRENTLY ALLWOS IT.
-Assignment :  id '=' Exp {Id $1}
-            
-Exp : '"' Exp '"' {String $2 }
-    | Exp '*' Exp {Mult $1 $3}--Ints
+ 
+Num : integer_lit {NumInt $1}
+    | float_lit {NumFloat $1}
+
+Line : string  {StringLit $1}
+    |Exp {StringExp $1}
+
+           
+Exp :  Exp '*' Exp {Mult $1 $3}--Ints
     | Exp '+' Exp {Plus $1 $3}
     | Exp '-' Exp {Subt $1 $3}
     | Exp '/' Exp {Divi $1 $3}
     | '-' Exp %prec UMINUS {Neg $2}
-    | id {$1}
+    | Num {Num $1}
 
-{-
-data Exp = String String
-    |Mult Int Int
-    |Plus Int Int
-    |Subt Int Int
-    |Divi Int Int
-    |Neg Int
-    |Id Int
-    |Mult Float Float
-    |Plus Float Float 
-    |Subt Float Float 
-    |Divi Float Float 
-    |Neg Float Float 
-    |Id Float 
-    Interiving Show
-
-data Declaration = Int Int
-                |Float Float
-                |String String
-
-data Statement = Id Exp
-                |Id Exp
-                |Id Exp
-               
-              
-    deriving Show
-
-data StatementList =
-    deriving Show
-
-data Assignment =
-
-    deriving Show
--}
 {
 parseError :: [Token] -> a
 parseError _ = error 'Parse error'

@@ -1,5 +1,6 @@
 {
-module Main (main) where
+module A1Lexer  where
+--Make this (main) when you want to print it off
 }
 
 %wrapper "basic"
@@ -54,5 +55,4 @@ data Token =
 --main = do
 --    s <- getContents
 --    print (alexScanTokens s)
---
 }
