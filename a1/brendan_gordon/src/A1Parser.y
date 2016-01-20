@@ -17,7 +17,7 @@ import Types
     '*'     { TokenMult }
     '-'     { TokenMinus }
     '/'     { TokenDiv }
-    '='     { TokenEq }
+    '='     { TokenEqual }
     '"'     { TokenQuote }
     int    { TokenInt $$ }
     float   { TokenFloat $$ }
@@ -25,7 +25,7 @@ import Types
     'if'      { TokenIf }
     'then'    { TokenThen }
     'else'    { TokenElse }
-    endif   { TokenEndif }
+    endif   { TokenEndIf }
     while   { TokenWhile }
     done    { TokenDone }
     do    { TokenDo }
@@ -35,8 +35,6 @@ import Types
     var     { TokenVar }
     ';'     { TokenSemicolon }
     ':'     { TokenColon }
-    integer_lit   { TokenIntLiteral $$ }
-    float_lit {TokenFloatLiteral $$}
 %%
 
 --This is where I define my grammar.
@@ -44,9 +42,9 @@ import Types
 
 Program : DeclarationsList ';' StatementList ';' { Program $1 $3}
 
-DeclarationsList : Declaration { DeclarationsList Empty $1}
+DeclarationsList : Declaration { DeclarationsList DEmpty $1}
                  | DeclarationsList ';' Declaration ';' {DeclarationsList $1 $3} 
-                    |   {Empty}
+                    |   {DEmpty}
 
 Declaration : var id ':' int {DeclarationInt $2 $4}
             | var id ':' float {DeclarationFloat $2 $4} 
@@ -58,14 +56,14 @@ Statement : 'if' id 'then' StatementList endif {IfState $2 $4}
             | read '"' Line '"'  {ReadState $3}
             |id '=' Exp {AssnStatement $1 $3}--problem 
 
-StatementList : Statement {StatementList Empty $1} 
+StatementList : Statement {StatementList SEmpty $1} 
             | StatementList ';' Statement {StatementList $1 $3}
-            |   {Empty}
+            |   {SEmpty}
 
 --REMEMBER. NO MULTIPLE ASSIGNMENTS. THIS GRAMMAR CURRENTLY ALLWOS IT.
  
-Num : integer_lit {NumInt $1}
-    | float_lit {NumFloat $1}
+NUM : int {NumInt $1}
+    | float {NumFloat $1}
 
 Line : string  {StringLit $1}
     |Exp {StringExp $1}
@@ -76,9 +74,9 @@ Exp :  Exp '*' Exp {Mult $1 $3}--Ints
     | Exp '-' Exp {Subt $1 $3}
     | Exp '/' Exp {Divi $1 $3}
     | '-' Exp %prec UMINUS {Neg $2}
-    | Num {Num $1}
+    | NUM {NUM $1}
 
 {
 parseError :: [Token] -> a
-parseError _ = error 'Parse error'
+parseError _ = error "Parse error"
 }
