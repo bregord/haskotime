@@ -27,11 +27,12 @@ tokens :-
     "do"                                    {\s->TokenDo}
     "int"                                   { \s-> TokenTypeI }
     "float"                                 { \s-> TokenTypeF}
+    "string"                                {\s->TokenTypeS}
     "print"                                 { \s -> TokenPrint }
     "read"                                  { \s -> TokenRead }
     "var"                                   { \s -> TokenVar} 
     """                                     {\s->TokenQuote}
-    [a-zA-Z0-9\.\!\?' ']+               { \s-> TokenString s }
+    "\[a-zA-Z0-9\.\!\?' ']+\"                  { \s-> TokenString s } --HERE IS A PROBLEM
     [a-zA-Z0-9]+                            { \s -> TokenId  s} --Here we extract the id from the variable.
 
     
@@ -57,6 +58,7 @@ data Token =
     TokenQuote      |
     TokenTypeI       |
     TokenTypeF       |
+    TokenTypeS      |
     TokenPlus       |
     TokenMinus      |
     TokenMult       |

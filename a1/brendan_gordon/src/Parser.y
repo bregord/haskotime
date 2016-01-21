@@ -39,37 +39,38 @@ import Types
     ';'     { TokenSemicolon }
     ':'     { TokenColon }
 %%
+
 --This is where I define my grammar.
 --statements
 --Could I make this into lists???/
 
---Have one rule that is 
 
-Program : DeclarationsList StatementList { Program $1 $2}
+Program : DeclarationsList ';' StatementList {Program $1 $3}
 
-DeclarationsList : Declaration { DeclarationsList DEmpty $1}
-                 | DeclarationsList Declaration {DeclarationsList $1 $2} 
+DeclarationsList : Declaration { Declaration $1}
+                 | DeclarationsList ';' Declaration {DeclarationsList $1 $3} 
 
-Declaration : var id ':' TypeInt ';' {DeclarationInt $2}
-            | var id ':' TypeFloat  ';' {DeclarationFloat $2 } 
-            | var id ':' TypeString ';' {DeclarationString $2 } 
+Declaration : var id ':' TypeInt {DeclarationInt $2}
+            | var id ':' TypeFloat {DeclarationFloat $2 } 
+            | var id ':' TypeString {DeclarationString $2 } 
 
-StatementList : Statement {StatementList SEmpty $1} 
+StatementList : Statement {Statement $1} 
             | StatementList ';' Statement {StatementList $1 $3}
+
 
 Statement : 'if' id 'then' StatementList endif {IfState $2 $4}
             |'if' id 'then' StatementList 'else' StatementList endif {IfElseState $2 $4 $6} 
             |while id do StatementList done {WhileState $2 $4}
-            | print Line ';' {PrintState $2}
-            | read Line ';' {ReadState $2}
-            |id '=' Exp ';' {AssnStatement $1 $3}--problem 
+            | print Line {PrintState $2}
+            | read Line {ReadState $2}
+            |id '=' Exp {AssnStatement $1 $3}--problem 
 
 NUM : int {NumInt $1}
     | float {NumFloat $1}
 
 Line : '"' string '"'  {StringLit $2}
     |Exp {StringExp $1}
---    |id {StringId $2} --THIS RULE IS BRoKEN
+    |id {StringId $1}
 
            
 Exp :  Exp '*' Exp {Mult $1 $3}--Ints

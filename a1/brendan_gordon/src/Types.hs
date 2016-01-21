@@ -7,16 +7,18 @@ data Program =  Program DeclarationsList StatementList
 --The Makes Sense line. 
 
 data DeclarationsList = DeclarationsList DeclarationsList Declaration 
+                    |Declaration Declaration
                     | DEmpty
     deriving Show
 
-data Declaration = DeclarationInt String Int  
-                |DeclarationFloat String Float
-                |DeclarationString String String
+data Declaration = DeclarationInt String
+                |DeclarationFloat String 
+                |DeclarationString String
                 deriving Show
 
 
 data StatementList = StatementList StatementList Statement
+                    |Statement Statement
                     | SEmpty
                     deriving Show
 
@@ -34,15 +36,13 @@ data IntLit = Int
 data FloatLit = Float
     deriving Show
 
-data Id = Id 
-    deriving Show
-
 data NUM = NumInt Int 
         |NumFloat Float
         deriving Show
            
 data Line = StringLit String
             |StringExp Exp 
+            |StringId String
             deriving Show
 
 data Exp = Mult Exp Exp
@@ -51,6 +51,7 @@ data Exp = Mult Exp Exp
         |Divi Exp Exp
         |Neg Exp
         |NUM NUM
+        |Id String
         deriving Show
 
 
