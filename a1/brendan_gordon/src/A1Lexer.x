@@ -32,7 +32,7 @@ tokens :-
     "read"                                  { \s -> TokenRead }
     "var"                                   { \s -> TokenVar} 
     """                                     {\s->TokenQuote}
-    "\[a-zA-Z0-9\.\!\?' ']+\"                  { \s-> TokenString s } --HERE IS A PROBLEM
+    --\"[a-zA-Z0-9\.\!\?' ']+\"               { \s-> TokenString s } --HERE IS A PROBLEM
     [a-zA-Z0-9]+                            { \s -> TokenId  s} --Here we extract the id from the variable.
 
     

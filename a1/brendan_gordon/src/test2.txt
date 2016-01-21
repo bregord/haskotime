@@ -1,3 +1,5 @@
+"hahaha"
+
 var x: int;
 var y: float;
 

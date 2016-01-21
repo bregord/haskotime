@@ -8,11 +8,16 @@ y=5;
 done
 
 
-if x then
-    x = 10;
-else
-    y=5;
-endif
+print x;
+read x;
+
+#if x then
+    #x = -2+10+10*5-2;
+ #   print " hi ibro";
+#    x="hello";
+#else
+#    y=5;
+#endif
 
 
 #while xyz do
@@ -35,4 +40,4 @@ endif
 
 
 #Problems - No empty blocks allowed. They should be.
-# - It doesn't allow 2 declaration statements next to one another
+#- Strings don't work -> This is because they are lal parsed as Ids. They really should be parsed as strings

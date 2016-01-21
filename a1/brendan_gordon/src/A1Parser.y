@@ -67,9 +67,8 @@ Statement : 'if' id 'then' StatementList endif {IfState $2 $4}
 NUM : int {NumInt $1}
     | float {NumFloat $1}
 
-Line : '"' string '"'  {StringLit $2}
+Line :'"' string '"'  {StringLit $2}
     |Exp {StringExp $1}
---    |id {StringId $2} --THIS RULE IS BRoKEN
 
            
 Exp :  Exp '*' Exp {Mult $1 $3}--Ints
