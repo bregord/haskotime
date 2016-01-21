@@ -55,7 +55,7 @@ Declaration : var id ':' TypeInt ';' {DeclarationInt $2}
             | var id ':' TypeString ';' {DeclarationString $2 } 
 
 StatementList : Statement {StatementList SEmpty $1} 
-            | StatementList ';' Statement {StatementList $1 $3}
+            | StatementList Statement {StatementList $1 $2}
 
 Statement : 'if' id 'then' StatementList endif {IfState $2 $4}
             |'if' id 'then' StatementList 'else' StatementList endif {IfElseState $2 $4 $6} 

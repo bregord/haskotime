@@ -2,13 +2,17 @@ var xyz: int;
 var y: float;
 
 
-#while xyz do
-#x = 10;
-#done
+while xyz do
+x = 10;
+y=5;
+done
+
 
 if x then
     x = 10;
-    endif
+else
+    y=5;
+endif
 
 
 #while xyz do
