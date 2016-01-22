@@ -1,6 +1,6 @@
 module Main  where
 import A1Lexer
-import A1Parser
+--import A1Parser
 import Types
 
 main::IO()

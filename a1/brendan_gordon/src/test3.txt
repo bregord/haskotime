@@ -1,5 +1,5 @@
-var xyz: int;
-var y: float;
+--var xyz: int;
+--var y: float;
 
 
 while xyz do
@@ -7,9 +7,10 @@ x = 10;
 y=5;
 done
 
+print "hi";
 
-print x;
-read x;
+print a;
+read "hihi";
 
 #if x then
     #x = -2+10+10*5-2;
@@ -40,4 +41,3 @@ read x;
 
 
 #Problems - No empty blocks allowed. They should be.
-#- Strings don't work -> This is because they are lal parsed as Ids. They really should be parsed as strings

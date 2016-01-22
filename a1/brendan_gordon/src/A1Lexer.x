@@ -1,75 +1,81 @@
 {
 module A1Lexer  where
 --Make this (main) when you want to print it off
-}
+ }
 
-%wrapper "basic"
+%wrapper "posn"
 
 tokens :-
     $white+                                 ;
-    ":"                                     {\s->TokenColon}
+    ":"                                     {\p s->TokenColon p}
     "#".*                                   ;
-   -- [\+\*\-\/]                              {\s->TokenOp (head s)}        
-    "+"                                     {\s->TokenPlus}
-    "-"                                     {\s ->TokenMinus}
-    "/"                                     {\s->TokenDiv}
-    "*"                                     {\s->TokenMult}
-    "="                                     { \s -> TokenEqual }
-    (((([1-9]+[0-9]*)|(0))?)(\.))(([0-9]*)) { \s -> TokenFloat (read s) } --I want x., .y, or x.y
-    ([1-9][0-9]*)|(0)                       {\s -> TokenInt (read s) }
-    ";"                                     {\s->TokenSemicolon}             
-    "if"                                    { \s-> TokenIf }
-    "else"                                  { \s -> TokenElse }
-    "then"                                  { \s-> TokenThen}
-    "endif"                                 { \s -> TokenEndIf }
-    "while"                                 { \s -> TokenWhile }
-    "done"                                  { \s -> TokenDone }
-    "do"                                    {\s->TokenDo}
-    "int"                                   { \s-> TokenTypeI }
-    "float"                                 { \s-> TokenTypeF}
-    "string"                                {\s->TokenTypeS}
-    "print"                                 { \s -> TokenPrint }
-    "read"                                  { \s -> TokenRead }
-    "var"                                   { \s -> TokenVar} 
-    """                                     {\s->TokenQuote}
-    --\"[a-zA-Z0-9\.\!\?' ']+\"               { \s-> TokenString s } --HERE IS A PROBLEM
-    [a-zA-Z0-9]+                            { \s -> TokenId  s} --Here we extract the id from the variable.
+   -- [\+\*\-\/]                              {\p s->TokenOp p (head s) }        
+    "+"                                     {\p s->TokenPlus p}
+    "-"                                     {\p s ->TokenMinus p}
+    "/"                                     {\p s->TokenDiv p}
+    "*"                                     {\p s->TokenMult p}
+    "="                                     {\p s -> TokenEqual  p}
+    (((([1-9]+[0-9]*)AlexPosn|(0))?)(\.))(([0-9]*)) {\p s -> TokenFloat p (read s)  } --I want x., .y, or x.y
+    ([1-9][0-9]*)AlexPosn|(0)                       {\p s -> TokenInt p (read s)  }
+    ";"                                     {\p s->TokenSemicolon p}             
+    "if"                                    {\p s-> TokenIf  p}
+    "else"                                  {\p s -> TokenElse  p}
+    "then"                                  {\p s-> TokenThen p}
+    "endif"                                 {\p s -> TokenEndIf  p}
+    "while"                                 {\p s -> TokenWhile  p}
+    "done"                                  {\p s -> TokenDone  p}
+    "do"                                    {\p s->TokenDo p}
+    "int"                                   {\p s-> TokenTypeI  p}
+    "float"                                 {\p s-> TokenTypeF p}
+    "string"                                {\p s->TokenTypeS p}
+    "print"                                 {\p s -> TokenPrint  p}
+    "read"                                  {\p s -> TokenRead  p}
+    "var"                                   {\p s -> TokenVar p} 
+    --"""                                    {\p s->TokenQuote p}
+    \"[a-zA-Z0-9\.\!\?' ']+\"               {\p s-> TokenString p s} --HERE IS A PROBLEM
+    [a-zA-Z0-9]+                            {\p s -> TokenId p s } --Here we extract the id from the variable.
 
     
 -- Each action has type :: String -> Token
 
+
 {
+
+tok f p s = f p s
+
 data Token = 
-    TokenInt Int     |
-    TokenFloat Float |
-    TokenString String|
-    TokenSemicolon   |
-    TokenColon      |
-    TokenId String   | 
-    TokenIf          |
-    TokenThen       |
-    TokenExpr        |
-    TokenEndIf       |
-    TokenElse        |
-    TokenWhile       |
-    TokenDone        |
-    TokenDo         |
-    TokenVar         |
-    TokenQuote      |
-    TokenTypeI       |
-    TokenTypeF       |
-    TokenTypeS      |
-    TokenPlus       |
-    TokenMinus      |
-    TokenMult       |
-    TokenDiv        |
-    --TokenOp Char     |
-    TokenEqual       |
-    TokenRead       |
-    TokenPrint       
+    TokenInt AlexPosn Int |
+    TokenFloat AlexPosn Float |
+    TokenString AlexPosn String|
+    TokenSemicolon  AlexPosn|
+    TokenColon AlexPosn|
+    TokenId AlexPosn String| 
+    TokenIf AlexPosn|
+    TokenThen AlexPosn|
+    TokenExpr AlexPosn|
+    TokenEndIf AlexPosn|
+    TokenElse AlexPosn|
+    TokenWhile AlexPosn|
+    TokenDone AlexPosn|
+    TokenDo AlexPosn|
+    TokenVar  AlexPosn|
+    TokenQuote AlexPosn|
+    TokenTypeI AlexPosn|
+    TokenTypeF AlexPosn|
+    TokenTypeS AlexPosn|
+    TokenPlus  AlexPosn|
+    TokenMinus AlexPosn|
+    TokenMult  AlexPosn|
+    TokenDiv   AlexPosn|
+    --TokenOp Char     AlexPosn|
+    TokenEqual AlexPosn|
+    TokenRead  AlexPosn|
+    TokenPrint AlexPosn      
     deriving(Eq,Show)
 
 --main = do
---    s <- getContents
---    print (alexScanTokens s)
-}
+  --  s <- getContents
+    --print (alexScanTokens s)
+
+ }
+

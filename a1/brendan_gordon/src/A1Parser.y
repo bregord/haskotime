@@ -18,7 +18,7 @@ import Types
     '-'     { TokenMinus }
     '/'     { TokenDiv }
     '='     { TokenEqual }
-    '"'     { TokenQuote }
+   -- '"'     { TokenQuote }
     int    { TokenInt $$ }
     float   { TokenFloat $$ }
     TypeFloat {TokenTypeF}
@@ -67,7 +67,7 @@ Statement : 'if' id 'then' StatementList endif {IfState $2 $4}
 NUM : int {NumInt $1}
     | float {NumFloat $1}
 
-Line :'"' string '"'  {StringLit $2}
+Line : string  {StringLit $1}
     |Exp {StringExp $1}
 
            
