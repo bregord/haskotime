@@ -18,7 +18,7 @@ import Types
     '-'     { TokenMinus }
     '/'     { TokenDiv }
     '='     { TokenEqual }
-   -- '"'     { TokenQuote }
+    '"'     { TokenQuote }
     int    { TokenInt $$ }
     float   { TokenFloat $$ }
     TypeFloat {TokenTypeF}
