@@ -1,0 +1,10 @@
+#!/bin/bash
+
+test -x src/MiniParser && exec src/MiniParser $@
+
+test -x MiniParser && exec ./MiniParser $@
+
+echo "No MiniParser executable found"
+
+
+

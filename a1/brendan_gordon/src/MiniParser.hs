@@ -1,5 +1,6 @@
-module MiniParser where
+module Main where
 
+import System.Environment
 import System.IO
 import Control.Monad
 import Text.ParserCombinators.Parsec
@@ -227,9 +228,13 @@ parseString str =
     Left e  -> error $ show e
     Right r -> r
 
-parseFile :: String -> IO [Stmt]
+parseFile :: String -> IO () 
 parseFile file =
   do program  <- readFile file
      case parse (miniParser <* eof) file program   of
-       Left e  -> print e >> fail "parse error"
-       Right r -> return r
+       Left e -> do putStrLn "Invalid" >> print e 
+       Right r -> do putStrLn "Valid"
+
+main = do
+    (arg:_) <- getArgs 
+    parseFile arg
