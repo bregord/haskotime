@@ -7,7 +7,6 @@ import Text.ParserCombinators.Parsec.Expr
 import Text.ParserCombinators.Parsec.Language
 import qualified Text.ParserCombinators.Parsec.Token as Token
 
-
 --Grammar
 {-program ::= declarationsList statementsList | [] statementsList | declarationsList []
 
@@ -24,38 +23,6 @@ line ::= string | exp
 exp ::= exp * exp | exp + exp | exp - exp | exp / exp | - exp | int | float | id -}
 
 
---Data Structures
-data Token = 
-        TokenInt  Int           |
-        TokenFloat  Float       |
-        TokenString  String     |
-        TokenSemicolon          |
-        TokenColon              |
-        TokenId  String         | 
-        TokenIf                 |
-        TokenThen               |
-        TokenExpr               |
-        TokenEndIf              |
-        TokenElse               |
-        TokenWhile              |
-        TokenDone               |
-        TokenDo                 |
-        TokenVar                |
-        TokenQuote              |
-        TokenTypeI              |
-        TokenTypeF              |
-        TokenTypeS              |
-        TokenPlus               |
-        TokenMinus              |
-        TokenMult               |
-        TokenDiv                |
-        TokenEqual              |
-        TokenRead               |
-        TokenPrint              |
-        EOFToken                
-        deriving(Eq,Show)
-
-
 data BinOp = Add | Multiply | Subtract | Divide deriving(Eq,Show)
 
 --data UnOp = Neg deriving(Eq,Show)
@@ -64,15 +31,13 @@ type Id = String
 
 --data Id =  String deriving(Eq,Show)
 
-data LineStmt = StringLine String | ExprString Expr deriving(Eq,Show)
+data LineStmt = StringLine String | IdString Id deriving(Eq,Show)
 
 data Decl = DecSeq [Decl] | Dec Id Type  deriving(Eq,Show)
 
-data Assn = Assn String Expr  deriving(Eq,Show)
+data Stmt = Seq [Stmt] | If Id Stmt | IfElse Id Stmt Stmt | While Id Stmt | Read Id | Print Id | Expr |IdStmt String | Assn Id Expr deriving(Eq,Show)
 
-data Stmt = Seq [Stmt] | If Id Stmt | IfElse Id Stmt Stmt | While Id Stmt | Read LineStmt | Print LineStmt | Expr |IdStmt String deriving(Eq,Show)
-
-data Expr = Var String | IntConst Integer | FloatConst Double | Binary BinOp Expr Expr | Neg Expr  deriving(Eq,Show)
+data Expr = Var String | IntConst Integer | FloatConst Double| Binary BinOp Expr Expr | Neg Expr  deriving(Eq,Show)
 
 data Type = FloatType String | IntType String | StringType String deriving (Eq,Show)
 
@@ -109,39 +74,22 @@ float = Token.float lexer
 semi      = Token.semi       lexer -- parses a semicolon
 colon       =Token.colon       lexer
 whiteSpace = Token.whiteSpace lexer -- parses whitespace
+parens = Token.parens lexer
+dot = Token.dot lexer
 
+miniParser:: Parser [Stmt]
+miniParser = whiteSpace >> many declaration >> many statement
 
-miniParser:: Parser Stmt
-miniParser = whiteSpace >> declaration >> statement
-
-statement::Parser Stmt 
-statement = sequenceOfStmt <|> statement
-
-
-sequenceOfStmt = do 
-        list <- (sepBy1 statement' semi) 
-        let res =  if (length list == 1) then (head list) else Seq list
-        return res
-
-declaration :: Parser Decl
-declaration = sequenceOfDecl <|> declaration
-
-sequenceOfDecl = do 
-    list <- (sepBy1 declaration' semi)
-    let res = if length list == 1 then head list else DecSeq list
-	in
-        return res
-
-statement' :: Parser Stmt
-statement' = ifStmt
+statement :: Parser Stmt
+statement = ifStmt
     <|> ifElseStmt
     <|> whileStmt
-    <|> idStmt
-    -- <|> printStmt
--- <|> readStmt
-           
-declaration' :: Parser Decl
-declaration' = decStmt
+    <|> assignStmt
+    <|> printStmt
+    <|> readStmt
+          
+declaration :: Parser Decl
+declaration = decStmt
 
 ifStmt :: Parser Stmt
 ifStmt =
@@ -171,10 +119,9 @@ whileStmt =
      reserved "done"
      return $ While cond stmt
 
-assignStmt :: Parser Assn 
+assignStmt :: Parser Stmt 
 assignStmt =
-  do reserved "var"
-     var  <- identifier
+  do var  <- identifier
      reservedOp "="
      expr <- expression
      semi
@@ -186,42 +133,36 @@ idStmt = do
     ident <- identifier
     return $  IdStmt ident
 
-{-
-line:: Parser LineStmt
-line = stringLit <|>expression
-
 readStmt:: Parser Stmt --get line and return it
 readStmt = do 
     reserved "read"
-    str <- expression 
+    str <- identifier 
     semi
     return $ Read str
 
 printStmt ::Parser Stmt
 printStmt = do
-    reserved "write"
-    str <- expression --an identifier or a string
+    reserved "print"
+    str <- identifier --an identifier or a string
     semi
     return $ Print str
--}
 
 typer :: Parser Type
 typer = stringType <|> intType <|> floatType
 
 stringType:: Parser Type
 stringType = do
-    val <- stringLit
+    val <- reserved "string"
     return $ StringType "string"
-
 
 floatType:: Parser Type
 floatType = do
-    val <- float
+    val <- reserved "float"
     return $ FloatType "float"
 
 intType:: Parser Type
 intType = do
-    val <- integer
+    val <- reserved "int"
     return $ IntType "int"
 
 decStmt :: Parser Decl
@@ -234,7 +175,6 @@ decStmt =
     semi
     return $ Dec var typ
 
-
 expression :: Parser Expr
 expression = buildExpressionParser operators term
 
@@ -246,21 +186,37 @@ operators = [ [Prefix (reservedOp "-" >> return (Neg             ))          ]
               ]
 
 --THIS PART
-term =  expression
-    <|> liftM Var identifier
-    <|> liftM IntConst integer
-    <|> liftM FloatConst float
+
+floatParser:: Parser Double 
+floatParser = 
+    do
+        pre <- many digit
+        dot
+        post <- many digit
+        case (pre,post) of
+            ([],[]) -> fail "Not a number"--Fail
+            (n,[]) -> return $ read n
+            ([],m) -> return $ read m
+            (n,m) -> return $ (read $ (n ++ "." ++  m)) --map show over both lists. Then concatenate it and read it.
+
+term::Parser Expr 
+term = parens expression  
+    <|>liftM Var identifier
+    <|> try ( liftM FloatConst floatParser) 
+    <|> (liftM IntConst integer)
+    -- <|> liftM FloatConst float --FloatConst Double 
+    --get as a list of numbers, and just zip with increasing powers of 10 to actually make it a number
 
 
-parseString :: String -> Stmt
+parseString :: String -> [Stmt]
 parseString str =
-  case parse miniParser "" str of
+  case parse (miniParser  <* eof) "" str of
     Left e  -> error $ show e
     Right r -> r
 
-parseFile :: String -> IO Stmt
+parseFile :: String -> IO [Stmt]
 parseFile file =
   do program  <- readFile file
-     case parse miniParser "" program of
+     case parse (miniParser <* eof) file program   of
        Left e  -> print e >> fail "parse error"
        Right r -> return r
