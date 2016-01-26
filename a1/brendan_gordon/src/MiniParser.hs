@@ -5,6 +5,7 @@ import Control.Monad
 import Text.ParserCombinators.Parsec
 import Text.ParserCombinators.Parsec.Expr
 import Text.ParserCombinators.Parsec.Language
+import Text.ParserCombinators.Parsec.Char
 import qualified Text.ParserCombinators.Parsec.Token as Token
 
 --Grammar
@@ -35,9 +36,9 @@ data LineStmt = StringLine String | IdString Id deriving(Eq,Show)
 
 data Decl = DecSeq [Decl] | Dec Id Type  deriving(Eq,Show)
 
-data Stmt = Seq [Stmt] | If Id Stmt | IfElse Id Stmt Stmt | While Id Stmt | Read Id | Print Id | Expr |IdStmt String | Assn Id Expr deriving(Eq,Show)
+data Stmt = Seq [Stmt] | If Id [Stmt] | IfElse Id [Stmt] [Stmt] | While Id [Stmt] | Read Expr | Print Expr | Expr |IdStmt String | Assn Id Expr deriving(Eq,Show)
 
-data Expr = Var String | IntConst Integer | FloatConst Double| Binary BinOp Expr Expr | Neg Expr  deriving(Eq,Show)
+data Expr = Var String | IntConst Integer | FloatConst Double| Binary BinOp Expr Expr | Neg Expr | StringEx String  deriving(Eq,Show)
 
 data Type = FloatType String | IntType String | StringType String deriving (Eq,Show)
 
@@ -96,7 +97,8 @@ ifStmt =
   do reserved "if"
      cond  <-identifier 
      reserved "then"
-     stmt1 <- statement
+     stmt1 <- many statement
+     reserved "endif"
      return $ If cond stmt1 
 
 
@@ -105,9 +107,9 @@ ifElseStmt =
   do reserved "if"
      cond  <- identifier 
      reserved "then"
-     stmt1 <- statement
+     stmt1 <- many statement
      reserved "else"
-     stmt2 <- statement
+     stmt2 <- many statement
      return $ IfElse cond stmt1 stmt2
 
 whileStmt :: Parser Stmt
@@ -115,7 +117,7 @@ whileStmt =
   do reserved "while"
      cond <- identifier 
      reserved "do"
-     stmt <- statement
+     stmt <- many statement
      reserved "done"
      return $ While cond stmt
 
@@ -136,14 +138,14 @@ idStmt = do
 readStmt:: Parser Stmt --get line and return it
 readStmt = do 
     reserved "read"
-    str <- identifier 
+    str <- expression 
     semi
     return $ Read str
 
 printStmt ::Parser Stmt
 printStmt = do
     reserved "print"
-    str <- identifier --an identifier or a string
+    str <- expression --an identifier or a string
     semi
     return $ Print str
 
@@ -199,11 +201,22 @@ floatParser =
             ([],m) -> return $ read m
             (n,m) -> return $ (read $ (n ++ "." ++  m)) --map show over both lists. Then concatenate it and read it.
 
+letters = ['0'..'9']++['a'..'z']++['A'..'Z']++[',','.','!','!',' ']
+
+stringParser:: Parser String
+stringParser = 
+    do
+        char '"'
+        str <- many $ oneOf letters 
+        char '"'
+        return $ str
+
 term::Parser Expr 
 term = parens expression  
     <|>liftM Var identifier
     <|> try ( liftM FloatConst floatParser) 
     <|> (liftM IntConst integer)
+    <|> liftM StringEx stringParser
     -- <|> liftM FloatConst float --FloatConst Double 
     --get as a list of numbers, and just zip with increasing powers of 10 to actually make it a number
 
