@@ -276,8 +276,6 @@ instance PrettyPrint Program where
 instance PrettyPrint AssocMap where
     prettyPrint (AssocMap (a, b)) = a ++ ":" ++ (prettyPrint b) ++ "\n" 
 
-
-
 pretty::(PrettyPrint a)=>a->String
 pretty a = prettyPrint a
 
@@ -298,89 +296,77 @@ parseFile file =
 --Type Checking
 symAdd::Decl->AssocMap
 symAdd (Dec a b) = AssocMap(a,b)
-
 --if a stmt is used in a different context than it should be, return false. otherwise true.
 --checkValidity::[AssocMap]->[Stmt]->Bool
 
---Either type?
---I NEED SOMET YPE CHECKING OF SOMESORT
+--design. maybe i ma
 
-
---CHECK IF IN THE MAP, AND THEN CHECK TO SEE IF THEY SATISFY
 
 --Want to make sure types match up.
 typeCheckStmt::[AssocMap]->Stmt->Bool
 typeCheckStmt [] _ =  False --ERROR - Clearly the thing is not declared 
-typeCheckStmt m (Assn a b) = if isInMap m a then typeCheckExpr m b else False 
-typeCheckStmt m (If a b)  = if (isInMap m a) && (typeCheckExpr m a) == IntType && (getTypeFromMap m a) == IntType then typeCheckExpr m b else False
-typeCheckStmt m (IfElse a b c) = if isInMap m a && (typeCheckExpr m a)==IntType && (getTypeFromMap m a) ==IntType then typeCheckExpr m b && typeCheckExpr m c else False
-typeCheckStmt m (While a b) = if isInMap m a && (typeCheckExpr m a)==IntType && (getTypeFromMap m a) ==IntType then typeCheckExpr m b else False
+typeCheckStmt m (Assn a b) = if (isInMap m a) && (typeCheckExpr m b) == getTypeFromMap m a then True else False 
+typeCheckStmt m (If a b)  = if  (typeCheckExpr m a) == IntType && typeCheckStmtList m b then True else False 
+typeCheckStmt m (IfElse a b c) = if (typeCheckExpr m a)==IntType && typeCheckStmtList m b   then True else False 
+typeCheckStmt m (While a b) = if (typeCheckExpr m a)==IntType && typeCheckStmtList m b  then True else False
+--typeCheckStmt m (Expr) =  
+--typeCheckStmt m (Read a) = if 
+--typeCheckStmt m (Print a) = 
+--typeCheckStmt m (IdStmt a) = 
 
-typeCheckExpr::[AssocMap]->Expr->Either CheckError Type
+typeCheckStmtList::[AssocMap]->[Stmt]->Bool
+typeCheckStmtList m [x] = typeCheckStmt m x
+typeCheckStmtList m (x:xs) = (typeCheckStmt m x) && (typeCheckStmtList m xs)
+
+
+typeCheckExpr::[AssocMap]->Expr->Type
 typeCheckExpr m (Var a) = getTypeFromMap m a --get from the list and return that 
-typeCheckExpr m (IntConst a) = Right IntType
-typeCheckExpr m (FloatConst a) = Right FloatType
+typeCheckExpr m (IntConst a) = IntType
+typeCheckExpr m (FloatConst a) = FloatType
 typeCheckExpr m (Binary op a b) = typeCheckBinOp m op a b
 typeCheckExpr m (Neg a) = typeCheckExpr m a 
-typeCheckExpr m (StringEx a) = Right StringType
+typeCheckExpr m (StringEx a) = StringType
 
 --this is where most rules come into play
 
 --DO AN EITHER STATEMENT HERE
-typeCheckBinOp::[AssocMap]->BinOp->Expr->Expr->Either CheckError Type
+typeCheckBinOp::[AssocMap]->BinOp->Expr->Expr->Type
 typeCheckBinOp m op lt rt =
     do 
-        lhs <- typeCheckExpr m lt
-        rhs <- typeCheckExpr m rt
+        lhs <- ( typeCheckExpr m lt)
+        rhs <- ( typeCheckExpr m rt)
         case (op, lhs,rhs) of
-			(Add, IntType, IntType) -> Right IntType 
-			(Add, IntType, FloatType)-> Right FloatType 
-			(Add, FloatType, IntType)-> Right FloatType 
-			(Add, FloatType, FloatType)-> Right FloatType 
-			(Add, StringType, StringType)-> Right StringType 
-			(Add, _, _)-> Left (CheckError "Invalid Type Combination") 
-			(Subtract, IntType, IntType) -> IntType 
-			(Subtract, IntType, FloatType) -> Right FloatType 
-			(Subtract, FloatType, IntType) -> Right  FloatType 
-			(Subtract, FloatType, FloatType) -> Right FloatType 
-			(Subtract, StringType, StringType) -> Right  StringType
-			(Subtract, _, _) -> Left (CheckError "Invalid Type Combination")
-			(Divide, IntType, IntType) -> Right IntType 
-			(Divide, IntType, FloatType) -> Right FloatType 
-			(Divide, FloatType, IntType) -> Right FloatType 
-			(Divide, FloatType, FloatType) -> Right FloatType 
-			(Divide, _, _) -> Left (CheckError "Invalid Type Combination")
-			(Multiply, IntType, IntType) -> Right IntType 
-			(Multiply, IntType, FloatType) -> Right FloatType 
-			(Multiply, FloatType, IntType) -> Right FloatType 
-			(Multiply, FloatType, FloatType) -> Right FloatType 
-			(Multiply, _, _) -> Left (CheckError "Invalid Type Combination")
-			(_,_,_) -> Left (CheckError "Invalid Type")
+			(Add, IntType, IntType) ->return  IntType 
+			(Add, IntType, FloatType)->return  FloatType 
+			(Add, FloatType, IntType)->return  FloatType 
+			(Add, FloatType, FloatType)->return  FloatType 
+			(Add, StringType, StringType)->return  StringType 
+			(Subtract, IntType, IntType) ->return  IntType 
+			(Subtract, IntType, FloatType) ->return  FloatType 
+			(Subtract, FloatType, IntType) ->return  FloatType 
+			(Subtract, FloatType, FloatType) ->return  FloatType 
+			(Subtract, StringType, StringType) ->return  StringType
+			(Divide, IntType, IntType) ->return  IntType 
+			(Divide, IntType, FloatType) ->return  FloatType 
+			(Divide, FloatType, IntType) ->return  FloatType 
+			(Divide, FloatType, FloatType) ->return  FloatType 
+			(Multiply, IntType, IntType) ->return  IntType 
+			(Multiply, IntType, FloatType) ->return  FloatType 
+			(Multiply, FloatType, IntType) ->return  FloatType 
+			(Multiply, FloatType, FloatType) -> return FloatType 
+			(_,_,_) ->return NullType 
 
-{-
-redec::String->IO ()
-redec fileName =
-    do
-        handle <- openFile fileName ReadMode
-        let contents <- hGetContents handle -- gets a list of "ID : Type"
-        let assocMap = map stringToAssocMap contents
-        hClose handle
-        return
-        --get each association, and build it
-        --check the associations
---Build AssocMap
---check It
-
--}
-
-getTypeFromMap::[AssocMap]->Id->Either CheckError Type
-getTypeFromMap [] a = Left (CheckError "Type Not Found") --Or maybe it should fail 
-getTypeFromMap ((i,t):xs) a = if i == a then Right t else (getTypeFromMap a xs)
+getTypeFromMap::[AssocMap]->Id->Type
+getTypeFromMap [] a = NullType--Or maybe it should fail 
+getTypeFromMap (AssocMap (i,t):xs) a = if i == a then t else (getTypeFromMap xs a)
 
 
 --ERROR HANDLING
 isInMap::[AssocMap]->Id->Bool
-isInMap m a = if (length (filter ((==a).fst) m) ==1) then True else False 
+isInMap [] _ = False
+isInMap (AssocMap (i,t):xs) a = if  i ==a then True else isInMap xs a
+
+
 
 typeCheck::Program->String->IO Bool
 typeCheck (Program a b) fileName = 
