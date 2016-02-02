@@ -2,6 +2,7 @@ module Main where
 
 import System.Environment
 import System.IO
+import qualified Data.Map
 import Control.Monad
 import Control.Monad.Error
 import Text.ParserCombinators.Parsec
@@ -22,11 +23,13 @@ data Stmt = Seq [Stmt] | If Expr [Stmt] | IfElse Expr [Stmt] [Stmt] | While Expr
 
 data Expr = Var String | IntConst Integer | FloatConst Double| Binary BinOp Expr Expr | Neg Expr | StringEx String  deriving(Eq,Show)
 
-data Type = FloatType| IntType | StringType | NullType deriving (Eq,Show)
+data Type = FloatType| IntType | StringType | NullType |Void deriving (Eq,Show)
 
 data Program = Program [Decl] [Stmt] deriving(Eq,Show)
 
-data AssocMap = AssocMap (Id, Type) deriving(Eq,Show)
+data AssocMap = AssocMap( Id, Type) deriving(Eq,Show)
+
+--data AssocMap = AssocMap (M.Map Id Type) deriving Eq, Show
 
 data CheckError = CheckError String deriving(Eq, Show)
 
@@ -274,7 +277,11 @@ instance PrettyPrint Program where
     prettyPrint (Program a b) = (prettyPrint a) ++ (prettyPrint b)
 
 instance PrettyPrint AssocMap where
-    prettyPrint (AssocMap (a, b)) = a ++ ":" ++ (prettyPrint b) ++ "\n" 
+    prettyPrint (AssocMap a b) = a ++ ":" ++ (prettyPrint b) ++ "\n" 
+
+--instance PrettyPrint AssocMap where
+  --  prettyPrint m = a@(M.toList m)   
+
 
 pretty::(PrettyPrint a)=>a->String
 pretty a = prettyPrint a
@@ -292,15 +299,21 @@ parseFile file =
        Left e -> do putStrLn "Invalid" >> print e 
        Right r -> do putStrLn "Valid" >> print r
 
-
 --Type Checking
 symAdd::Decl->AssocMap
 symAdd (Dec a b) = AssocMap(a,b)
 --if a stmt is used in a different context than it should be, return false. otherwise true.
 --checkValidity::[AssocMap]->[Stmt]->Bool
+--design. maybe i mao
+--
+--    traverse the list of statements and type check each statement.
+--    Assignments - check that the lhs is declared and check if the rhs is the same type as the lhs.
+--    if, while - check that the expression if/while expression is an int.
+--    All expressions are composed of unary and binary operators and those are type checked according to the rules above.
+--    If there are any typing errors, do not generate any code and output the type errors. Otherwise, generate the C code.
 
---design. maybe i ma
-
+--NEED TO MAKE SURE
+--ALL VARIABLES ARE DECLARED
 
 --Want to make sure types match up.
 typeCheckStmt::[AssocMap]->Stmt->Bool
@@ -309,64 +322,66 @@ typeCheckStmt m (Assn a b) = if (isInMap m a) && (typeCheckExpr m b) == getTypeF
 typeCheckStmt m (If a b)  = if  (typeCheckExpr m a) == IntType && typeCheckStmtList m b then True else False 
 typeCheckStmt m (IfElse a b c) = if (typeCheckExpr m a)==IntType && typeCheckStmtList m b   then True else False 
 typeCheckStmt m (While a b) = if (typeCheckExpr m a)==IntType && typeCheckStmtList m b  then True else False
---typeCheckStmt m (Expr) =  
---typeCheckStmt m (Read a) = if 
---typeCheckStmt m (Print a) = 
---typeCheckStmt m (IdStmt a) = 
+typeCheckStmt m a@(Expr) = typeCheckExpr m a
+typeCheckStmt m (Read a) = typeCheckExpr m a 
+typeCheckStmt m (Print a) = typeCheckExpr  m a 
+--typeCheckStmt m (IdStmt a) = --if the type of the id and the stmt are the same 
 
 typeCheckStmtList::[AssocMap]->[Stmt]->Bool
 typeCheckStmtList m [x] = typeCheckStmt m x
 typeCheckStmtList m (x:xs) = (typeCheckStmt m x) && (typeCheckStmtList m xs)
 
 
-typeCheckExpr::[AssocMap]->Expr->Type
-typeCheckExpr m (Var a) = getTypeFromMap m a --get from the list and return that 
-typeCheckExpr m (IntConst a) = IntType
-typeCheckExpr m (FloatConst a) = FloatType
-typeCheckExpr m (Binary op a b) = typeCheckBinOp m op a b
-typeCheckExpr m (Neg a) = typeCheckExpr m a 
-typeCheckExpr m (StringEx a) = StringType
+typeCheckExpr::[AssocMap]->Expr->Bool
+
+--The first, given a binary operator as input, produces the list of all the types that can go in the left operand.
+getTypeLOp::BinOp->[Type]
+getTypeLOp (Plus) = [IntType, FloatType, StringType]
+getTypeLOp (Multiply) = [IntType, FloatType]
+getTypeLOp (Divide) = [IntType, FloatType] 
+getTypeLOp (Subtract) = [IntType, FloatType, StringType]
+
+
+--The second, given a binary operator and a type, outputs the list of all the types that can go in the right operand.
+getTypeROp::BinOp->Type->[Type]
+getTypeROp (Plus) IntType = [IntType, FloatType]
+getTypeROp (Subtract) IntType = [IntType, FloatType]
+getTypeROp (Divide) IntType = [IntType, FloatType]
+getTypeROp (Multiply) IntType = [IntType, FloatType]
+getTypeROp (Plus) FloatType= [IntType, FloatType]
+getTypeROp (Subtract) FloatType = [IntType, FloatType]
+getTypeROp (Divide) FloatType = [IntType, FloatType]
+getTypeROp (Multiply) Floatype = [IntType, FloatType]
+getTypeROp (Plus) StringType= [StringType] 
+getTypeROp (Subtract) StringType = [StringType]
+
+typeCheckBinOp::[AssocMap]-> ???->Bool
+
+--AAAALLLRIGHT. THE IMPORTANT THING IS I AMY NEED A DATASTRUCTURE THAT HAS THE TYPE OF THE LEFT AND THE RIGHT
+
+getTypeStmt::[AssocMap]->Stmt->Type
+getTypeStmt m (Assn a b) = Void
+getTypeStmt m (Read a) = Void 
+getTypeStmt m (Print a = Void)
+
+getTypeExpr::[AssocMap]->Expr->Type
+getTypeExpr m (Var a) = getTypeFromMap m a --get from the list and return that 
+getTypeExpr m (IntConst a) = IntType
+getTypeExpr m (FloatConst a) = FloatType
+getTypeExpr m (Binary op a b) = typeCheckBinOp m op a b
+getTypeExpr m (Neg a) = getTypeExpr a 
+getTypeExpr m (StringEx a) = StringType
 
 --this is where most rules come into play
-
---DO AN EITHER STATEMENT HERE
-typeCheckBinOp::[AssocMap]->BinOp->Expr->Expr->Type
-typeCheckBinOp m op lt rt =
-    do 
-        lhs <- ( typeCheckExpr m lt)
-        rhs <- ( typeCheckExpr m rt)
-        case (op, lhs,rhs) of
-			(Add, IntType, IntType) ->return  IntType 
-			(Add, IntType, FloatType)->return  FloatType 
-			(Add, FloatType, IntType)->return  FloatType 
-			(Add, FloatType, FloatType)->return  FloatType 
-			(Add, StringType, StringType)->return  StringType 
-			(Subtract, IntType, IntType) ->return  IntType 
-			(Subtract, IntType, FloatType) ->return  FloatType 
-			(Subtract, FloatType, IntType) ->return  FloatType 
-			(Subtract, FloatType, FloatType) ->return  FloatType 
-			(Subtract, StringType, StringType) ->return  StringType
-			(Divide, IntType, IntType) ->return  IntType 
-			(Divide, IntType, FloatType) ->return  FloatType 
-			(Divide, FloatType, IntType) ->return  FloatType 
-			(Divide, FloatType, FloatType) ->return  FloatType 
-			(Multiply, IntType, IntType) ->return  IntType 
-			(Multiply, IntType, FloatType) ->return  FloatType 
-			(Multiply, FloatType, IntType) ->return  FloatType 
-			(Multiply, FloatType, FloatType) -> return FloatType 
-			(_,_,_) ->return NullType 
 
 getTypeFromMap::[AssocMap]->Id->Type
 getTypeFromMap [] a = NullType--Or maybe it should fail 
 getTypeFromMap (AssocMap (i,t):xs) a = if i == a then t else (getTypeFromMap xs a)
 
-
 --ERROR HANDLING
-isInMap::[AssocMap]->Id->Bool
-isInMap [] _ = False
-isInMap (AssocMap (i,t):xs) a = if  i ==a then True else isInMap xs a
-
-
+--isInMap::[AssocMap]->Id->Bool
+--isInMap [] _ = False
+--isInMap (AssocMap (i,t):xs) a = if  i ==a then True else isInMap xs a
 
 typeCheck::Program->String->IO Bool
 typeCheck (Program a b) fileName = 
@@ -374,6 +389,7 @@ typeCheck (Program a b) fileName =
         --let handle = (many (noneOf "." fileName)) -- ++ ".symbol.txt"
         handle <- openFile (fileName ++ ".symbol.txt") WriteMode
         let assocMapList = map symAdd a --list of maps
+        
         --
         let b = map pretty assocMapList
         hPutStr handle $ concat b
