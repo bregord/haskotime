@@ -19,7 +19,7 @@ data LineStmt = StringLine String | IdString Id deriving(Eq,Show)
 
 data Decl = DecSeq [Decl] | Dec Id Type  deriving(Eq,Show)
 
-data Stmt = Seq [Stmt] | If Expr [Stmt] | IfElse Expr [Stmt] [Stmt] | While Expr [Stmt] | Read Expr | Print Expr | Expr |IdStmt String | Assn Id Expr deriving(Eq,Show)
+data Stmt = Seq [Stmt] | If Expr [Stmt] | IfElse Expr [Stmt] [Stmt] | While Expr [Stmt] | Read Expr | Print Expr |IdStmt String | Assn Id Expr deriving(Eq,Show)
 
 data Expr = Var String | IntConst Integer | FloatConst Double| Binary BinOp Expr Expr | Neg Expr | StringEx String  deriving(Eq,Show)
 
@@ -31,7 +31,10 @@ data AssocMap = AssocMap( Id, Type) deriving(Eq,Show)
 
 --data AssocMap = AssocMap (M.Map Id Type) deriving Eq, Show
 
-data CheckError = CheckError String deriving(Eq, Show)
+data Annotation = IdAnnote (Id, Type) | ExprAnnote (Expr, Type) | StmtAnnote (Stmt, Type)
+
+data Error = CheckError String | IncompatibleTypes String | NoDecs String 
+ ProgramError String deriving(Eq, Show)
 
 languageDef = 
     emptyDef{
@@ -314,25 +317,58 @@ symAdd (Dec a b) = AssocMap(a,b)
 
 --NEED TO MAKE SURE
 --ALL VARIABLES ARE DECLARED
+--
+-- ***** THE MAIN IDEA: RETURN TYPES. REPRESENT FAILURE WITH EITHER MONAD *****
+--otherwise, bubble it up
 
---Want to make sure types match up.
-typeCheckStmt::[AssocMap]->Stmt->Bool
-typeCheckStmt [] _ =  False --ERROR - Clearly the thing is not declared 
-typeCheckStmt m (Assn a b) = if (isInMap m a) && (typeCheckExpr m b) == getTypeFromMap m a then True else False 
-typeCheckStmt m (If a b)  = if  (typeCheckExpr m a) == IntType && typeCheckStmtList m b then True else False 
-typeCheckStmt m (IfElse a b c) = if (typeCheckExpr m a)==IntType && typeCheckStmtList m b   then True else False 
-typeCheckStmt m (While a b) = if (typeCheckExpr m a)==IntType && typeCheckStmtList m b  then True else False
-typeCheckStmt m a@(Expr) = typeCheckExpr m a
-typeCheckStmt m (Read a) = typeCheckExpr m a 
-typeCheckStmt m (Print a) = typeCheckExpr  m a 
---typeCheckStmt m (IdStmt a) = --if the type of the id and the stmt are the same 
+typeCheckProgram::Map->Program->Either Error [Annotation]
+typeCheckProgram m (Program decList stList) = 
+    do
+        typeCheckDecList m decList
+        case typeCheckStmtList m stList of 
+            Left (CheckError "Didn't TypeCheck Properly")
+            Right r
 
-typeCheckStmtList::[AssocMap]->[Stmt]->Bool
-typeCheckStmtList m [x] = typeCheckStmt m x
-typeCheckStmtList m (x:xs) = (typeCheckStmt m x) && (typeCheckStmtList m xs)
+typeCheckDecList::Map->[Decl]->Either Error Bool
+typeCheckDecList m d = 
+    do 
+        a<-mapM (checkDecs m) d
+        
 
 
-typeCheckExpr::[AssocMap]->Expr->Bool
+
+
+
+
+typeCheckStmtList::Map->[Stmt]->Either Error [Annotation] 
+typeCheckStmtList m x = Right $ mapM (typeCheckStmt m) x 
+
+
+
+typeCheckStmt::Map->Stmt->Either Error Annotation 
+typeCheckStmt [] _ =  Left $ NoDecs "Error No Declarations" --ERROR - Clearly the thing is not declared 
+typeCheckStmt m (Assn a b) = if (M.member a m) && (typeCheckExpr m b) == M.lookup m a then Right (M.lookup m a) else CheckError "Error in Assignment Statement Types"  
+typeCheckStmt m (If a b)  = if  (typeCheckExpr m a) == IntType && typeCheckStmtList m b then True else CheckError "Error in If Statement Types"
+typeCheckStmt m (IfElse a b c) = if (typeCheckExpr m a)==IntType && typeCheckStmtList m b   then True else CheckError "Error in IfElse Statement Types "
+typeCheckStmt m (While a b) = if (typeCheckExpr m a)==IntType && typeCheckStmtList m b  then True else CheckError "Error in While Statement Types"
+typeCheckStmt m (Read a) = Right $ typeCheckExpr m a 
+typeCheckStmt m (Print a) = Right $ typeCheckExpr  m a 
+
+
+
+typeCheckExpr::Map->Expr->Either Error Annotation
+getTypeExpr m (Var a) = Right M.lookup m a --get from the list and return that 
+getTypeExpr m (IntConst a) = Right IntType
+getTypeExpr m (FloatConst a) = Right FloatType
+getTypeExpr m (Binary op a b) = Right $ typeCheckBinOp m op a b
+getTypeExpr m (Neg a) = Right $ getTypeExpr a 
+getTypeExpr m (StringEx a) = Right StringType
+getTypeExpr m _ = Left $ CheckError "Error in Expr"
+
+
+typeCheckBinOp::Map->BinOp->Expr->Expr->Either CheckError Type
+
+
 
 --The first, given a binary operator as input, produces the list of all the types that can go in the left operand.
 getTypeLOp::BinOp->[Type]
@@ -340,7 +376,6 @@ getTypeLOp (Plus) = [IntType, FloatType, StringType]
 getTypeLOp (Multiply) = [IntType, FloatType]
 getTypeLOp (Divide) = [IntType, FloatType] 
 getTypeLOp (Subtract) = [IntType, FloatType, StringType]
-
 
 --The second, given a binary operator and a type, outputs the list of all the types that can go in the right operand.
 getTypeROp::BinOp->Type->[Type]
@@ -355,46 +390,20 @@ getTypeROp (Multiply) Floatype = [IntType, FloatType]
 getTypeROp (Plus) StringType= [StringType] 
 getTypeROp (Subtract) StringType = [StringType]
 
-typeCheckBinOp::[AssocMap]-> ???->Bool
+--Want to make sure types match up.
+--typeCheckStmt m (IdStmt a) = --if the type of the id and the stmt are the same 
 
---AAAALLLRIGHT. THE IMPORTANT THING IS I AMY NEED A DATASTRUCTURE THAT HAS THE TYPE OF THE LEFT AND THE RIGHT
-
-getTypeStmt::[AssocMap]->Stmt->Type
-getTypeStmt m (Assn a b) = Void
-getTypeStmt m (Read a) = Void 
-getTypeStmt m (Print a = Void)
-
-getTypeExpr::[AssocMap]->Expr->Type
-getTypeExpr m (Var a) = getTypeFromMap m a --get from the list and return that 
-getTypeExpr m (IntConst a) = IntType
-getTypeExpr m (FloatConst a) = FloatType
-getTypeExpr m (Binary op a b) = typeCheckBinOp m op a b
-getTypeExpr m (Neg a) = getTypeExpr a 
-getTypeExpr m (StringEx a) = StringType
-
---this is where most rules come into play
-
-getTypeFromMap::[AssocMap]->Id->Type
-getTypeFromMap [] a = NullType--Or maybe it should fail 
-getTypeFromMap (AssocMap (i,t):xs) a = if i == a then t else (getTypeFromMap xs a)
-
---ERROR HANDLING
---isInMap::[AssocMap]->Id->Bool
---isInMap [] _ = False
---isInMap (AssocMap (i,t):xs) a = if  i ==a then True else isInMap xs a
-
-typeCheck::Program->String->IO Bool
+typeCheck::Program->String->IO ()
 typeCheck (Program a b) fileName = 
     do
         --let handle = (many (noneOf "." fileName)) -- ++ ".symbol.txt"
         handle <- openFile (fileName ++ ".symbol.txt") WriteMode
-        let assocMapList = map symAdd a --list of maps
-        
-        --
-        let b = map pretty assocMapList
+        let assocMapList = map symAdd a --list of map 
+        let m = map pretty assocMapList
+        c <- typeCheckProgram m (Program a b)
         hPutStr handle $ concat b
         hClose handle
-        return True
+        return
 
 main = do
     (arg:_) <- getArgs 
