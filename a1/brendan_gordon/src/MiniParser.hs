@@ -1,7 +1,9 @@
 {-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE FlexibleInstances #-}
 
 module Main where
 
+import System.FilePath
 import System.Exit
 import System.Environment
 import System.IO
@@ -287,12 +289,50 @@ instance PrettyPrint AssocMap where
     prettyPrint (AssocMap (a, b)) = a ++ ":" ++ (prettyPrint b) ++ "\n" 
 
 
+
+getDecorator::Type->String
+getDecorator (FloatType) = "%f"
+getDecorator (IntType) = "%d"
+getDecorator (StringType) = "%s"
+
+getTypeFromID::Id Type->Type
+getTypeFromID (Val a b) = b
+
+cHeaders =  "  #include <stdio.h>\n \ 
+\ #include <stdlib.h>\n \
+\ #include <string.h>\n \
+
+
+\ char* concat(char *str1, char *str2)\n \
+\ {\n \
+        
+\        char *result = malloc(strlen(str1)+strlen(str2));\n \
+\        strcpy(result, str1);\n \
+\        strcat(result, str2);\n \
+\        return result;\n \
+\ }\n \
+
+
+\ void rev(char *str)\n \
+\ {\n \
+\    char *start = str;\n \
+\    char *end = start + strlen(str) - 1;\n \
+\    char temp;\n \
+\    while (end > start)\n \
+\    {\n \
+\        temp = *start;\n \
+\        *start = *end;\n \
+\        *end = temp;\n \
+\        ++start;\n \
+\        --end;\n \
+\    }\n \
+\ }  "
+
 toC::CPrint a => a->String
 toC a = cPrint a
 
 class CPrint a where
     cPrint::a->String
---CPretty Printer
 
 instance CPrint a => (CPrint [a]) where
     cPrint a = concat $ map cPrint a
@@ -300,32 +340,43 @@ instance CPrint a => (CPrint [a]) where
 instance CPrint Type  where
     cPrint (FloatType) = "float"
     cPrint (IntType) = "int"
-    cPrint (StringType) = "string" 
+    cPrint (StringType) = "char*" 
 
-instance CPrint (Program u) where
-    cPrint (Program a b) = (cPrint a) ++ (cPrint b)
+instance CPrint (Program Type) where
+    cPrint (Program a b) = cHeaders ++  "int main() {\n" ++ (cPrint a)++ "\n" ++ (cPrint b) ++ "\n}\n"
 
 instance CPrint Decl where
     cPrint (DecSeq a) = cPrint a
     cPrint (Dec a b) =  (cPrint b) ++ " "++ (a)  ++ ";\n"
 
-instance CPrint (Expr t) where
-    cPrint (Neg t_ a) = "-" ++ "(" ++ cPrint a ++ ")"  
+instance CPrint (Expr Type) where
+    cPrint (Neg t a) = 
+        case t of
+            (IntType) -> "-" ++ "(" ++ cPrint a ++ ")" 
+            (FloatType) -> "-" ++ "(" ++ cPrint a ++ ")" 
+            (StringType) ->"rev(" ++cPrint a ++" )"  
     cPrint (Var t a) =  a
     cPrint (IntConst t a) = show a
     cPrint (FloatConst t a) = show a
-    cPrint (StringEx  t a) = a
-    cPrint (Binary t op a b) =  read $ (cPrint a) ++ (cPrint op) ++ (cPrint b)
+    cPrint (StringEx t a) = a
+    cPrint (Binary t op a b) = 
+        case t of 
+            (StringType) ->
+                case op of
+                    (Add) -> "concat(" ++ (cPrint a) ++", " ++ (cPrint b) ++ ")"
+                    (Subtract) -> "concat(" ++ (cPrint a) ++", rev(" ++  (cPrint b) ++"));"
+            (FloatType) -> (cPrint a) ++ (cPrint op) ++ (cPrint b)
+            (IntType) -> (cPrint a) ++ (cPrint op) ++ (cPrint b)
 
-instance CPrint (Stmt u) where
+instance CPrint (Stmt Type) where
     cPrint (Seq a) = cPrint a
-    cPrint (If a b) =  "if " ++ "(" ++ (cPrint a) ++ "){" ++  (cPrint b) ++ "}" 
-    cPrint (IfElse a b c) = "if " ++ (cPrint a) ++ " then " ++ (cPrint b) ++ " else " ++ (cPrint c)
-    cPrint (While a b) =  "while " ++ "(" ++  (cPrint a) ++ "){" ++ (cPrint b) ++ "}" 
-    cPrint (Print a) = -- printf  cPrint a ++ ";"
-    cPrint (Read a) =  -- scanf("%s", &str1); cPrint a ++ ";"
-    cPrint (Assn a b) =  cPrint a ++ " = " ++  (cPrint b) ++ ";"
-    cPrint (IdStmt a) = a
+    cPrint (If a b) =  "if " ++ "(" ++ (cPrint a) ++ "){\n" ++  (cPrint b) ++ "}\n\n" 
+    cPrint (IfElse a b c) = "if " ++ "(" ++ (cPrint a) ++ "){\n" ++  (cPrint b) ++  "}else{\n" ++ (cPrint c) ++ "}\n\n"  
+    cPrint (While a b) =  "while " ++ "(" ++  (cPrint a) ++ "){\n" ++ (cPrint b) ++ "}\n\n" 
+    cPrint (Print a) = "printf(\"" ++ (getDecorator $  getTypeFrom a) ++ "\",&"  ++ cPrint a ++ ");\n\n"
+    cPrint (Read a) =  "scanf(\"" ++ (getDecorator $ (getTypeFromID a)) ++ "\", &" ++ cPrint a ++" );\n\n"
+    cPrint (Assn a b) =  cPrint a ++ " = " ++  (cPrint b) ++ ";\n"
+    cPrint (IdStmt a) =  a
 
 instance CPrint (Id a) where
     cPrint (Val s  t) = s 
@@ -415,8 +466,6 @@ getTypeFrom (StringEx a _) = a
 getTypeFrom (Neg _ a) = getTypeFrom a
 getTypeFrom (Binary a _ _ _) = a
 
---data Expr a = Var a String  | IntConst a Integer| FloatConst a Double | Binary a BinOp (Expr a) (Expr a) | Neg a (Expr a)| StringEx  a String deriving(Eq,Show)
-
 typeCheckExpr::M.Map (Id ()) Type->Expr ()->Either SemError (Expr Type)
 typeCheckExpr m (Var _ a) =  do 
     case M.lookup (Val a ()) m of 
@@ -447,7 +496,6 @@ typeCheckBinOp m op l r =
                 (IntType, IntType) -> Right (Binary IntType op lt rt )
                 (StringType, StringType) -> Right (Binary StringType op lt rt )
             else Left $ CheckError "Type Mismatch in Binary Op"   
-
 
 --The first, given a binary operator as input, produces the list of all the types that can go in the left operand.
 getTypeLOp::BinOp->[Type]
@@ -492,27 +540,29 @@ parseFileAndCheck file =
        Left e -> fail "ERROR PARSING" 
        Right r -> typeCheck r file
 
-cPrettyPrinter::(Program Type)->IO ()
-cPrettyPrinter a = do
-        print $ cPrint a
+cPrettyPrinter::String->(Program Type)->IO ()
+cPrettyPrinter fileName a = do    
+        handle <- openFile (fileName -<.> ".c") WriteMode            
+        hPutStr handle (cPrint a)
+        hClose handle
+
 
 --data Program a = Program [Decl] [Stmt a] deriving(Eq,Show)
 symAdd::Decl->AssocMap
 symAdd (Dec a b) = AssocMap(a,b)
 
 typeCheck::Program ()->String->IO (Program Type)
-typeCheck (Program a b) fileName = 
-    do
-        --let handle = (many (noneOf "." fileName)) -- ++ ".symbol.txt"
-        handle <- openFile (fileName ++ ".symbol.txt") WriteMode
+typeCheck (Program a b) fileName = do
+        handle <- openFile (replaceExtension fileName ".symbol.txt") WriteMode
         let assocMapList = map symAdd a --list of map 
         let m = map pretty assocMapList
         let am = M.fromList $ map (\(AssocMap(c,d))->(Val c (), d)) assocMapList 
         let c = typeCheckProgram am (Program a b)
+        --writeFile fileName $ concat m
         hPutStr handle $ concat m 
         hClose handle
         case c of
-            Right c -> (cPrettyPrinter c) >>  return c --feed C into the cTypeChecker
+            Right c -> (cPrettyPrinter fileName c) >>return c --feed C into the cTypeChecker
             Left e-> case e of 
                 (CheckError e) -> putStrLn  e >> exitFailure --TODO: EXIT ON FAILURE 
                 (IncompatibleTypes e) -> putStrLn  e >> exitFailure --TODO: EXIT ON FAILURE 
@@ -527,3 +577,6 @@ main = do
 --TODO:
 --pretty print for files
 --cprint for files
+--
+--string reverse
+
