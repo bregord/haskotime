@@ -1,13 +1,18 @@
 # Compute 2.0^x
 var x: int;
 var y: float;
+var z: string;
 
-x = 10;
-y = 1.0;
+if x then y=1.0; else x=10; endif 
 
-while x do
-y = y * 2.0;
-x = x - 1;
-done
+#x = 10;
+#y = 1.0;
+#print z;
+#z=5+50;
 
-print y;
+#while x do
+#y = y * 2.0;
+#x = x - 1;
+#done
+
+#print y;

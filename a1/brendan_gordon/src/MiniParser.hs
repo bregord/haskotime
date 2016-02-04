@@ -79,7 +79,6 @@ whiteSpace = Token.whiteSpace lexer -- parses whitespace
 parens = Token.parens lexer
 dot = Token.dot lexer
 
-
 miniParser:: Parser (Program ())
 miniParser = 
     do 
@@ -88,13 +87,9 @@ miniParser =
         y <- many statement
         return $ Program x y
 
---miniParser:: Parser [Stmt]
---miniParser = whiteSpace >> many declaration >> many statement
---Compose miniParser with another to get declarations too.
-
 statement :: Parser (Stmt ())
-statement = ifStmt
-    <|> ifElseStmt
+statement = ifElseStmt
+    <|>  ifStmt
     <|> whileStmt
     <|> assignStmt
     <|> printStmt
@@ -121,6 +116,7 @@ ifElseStmt =
      stmt1 <- many statement
      reserved "else"
      stmt2 <- many statement
+     reserved "endif"
      return $ IfElse  cond  stmt1 stmt2 
 
 whileStmt :: Parser (Stmt ())
@@ -226,6 +222,7 @@ stringParser =
         char '"'
         return $ str
 
+--generate c code
 term::Parser (Expr ()) 
 term = parens expression  
     <|>liftM2 Var (pure ()) identifier
@@ -239,6 +236,9 @@ term = parens expression
 --Pretty Printer
 class PrettyPrint a where
     prettyPrint::a->String
+
+pretty::(PrettyPrint a)=>a->String
+pretty a = prettyPrint a
 
 instance PrettyPrint (Expr t) where
     prettyPrint (Neg _ a) = ("-" ++ (prettyPrint a)) 
@@ -286,28 +286,62 @@ instance PrettyPrint (Program u) where
 instance PrettyPrint AssocMap where
     prettyPrint (AssocMap (a, b)) = a ++ ":" ++ (prettyPrint b) ++ "\n" 
 
-pretty::(PrettyPrint a)=>a->String
-pretty a = prettyPrint a
 
-parseString :: String -> (Program ())
-parseString str =
-  case parse (miniParser  <* eof) "" str of
-    Left e  -> error $ show e
-    Right r ->  r
+toC::CPrint a => a->String
+toC a = cPrint a
 
-parseFile :: String -> IO () 
-parseFile file =
-  do program  <- readFile file
-     case parse (miniParser <* eof) file program   of
-       Left e -> do putStrLn "Invalid" >> print e 
-       Right r -> do putStrLn "Valid" >> print r
+class CPrint a where
+    cPrint::a->String
+--CPretty Printer
+
+instance CPrint a => (CPrint [a]) where
+    cPrint a = concat $ map cPrint a
+
+instance CPrint Type  where
+    cPrint (FloatType) = "float"
+    cPrint (IntType) = "int"
+    cPrint (StringType) = "string" 
+
+instance CPrint (Program u) where
+    cPrint (Program a b) = (cPrint a) ++ (cPrint b)
+
+instance CPrint Decl where
+    cPrint (DecSeq a) = cPrint a
+    cPrint (Dec a b) =  (cPrint b) ++ " "++ (a)  ++ ";\n"
+
+instance CPrint (Expr t) where
+    cPrint (Neg t_ a) = "-" ++ "(" ++ cPrint a ++ ")"  
+    cPrint (Var t a) =  a
+    cPrint (IntConst t a) = show a
+    cPrint (FloatConst t a) = show a
+    cPrint (StringEx  t a) = a
+    cPrint (Binary t op a b) =  read $ (cPrint a) ++ (cPrint op) ++ (cPrint b)
+
+instance CPrint (Stmt u) where
+    cPrint (Seq a) = cPrint a
+    cPrint (If a b) =  "if " ++ "(" ++ (cPrint a) ++ "){" ++  (cPrint b) ++ "}" 
+    cPrint (IfElse a b c) = "if " ++ (cPrint a) ++ " then " ++ (cPrint b) ++ " else " ++ (cPrint c)
+    cPrint (While a b) =  "while " ++ "(" ++  (cPrint a) ++ "){" ++ (cPrint b) ++ "}" 
+    cPrint (Print a) = -- printf  cPrint a ++ ";"
+    cPrint (Read a) =  -- scanf("%s", &str1); cPrint a ++ ";"
+    cPrint (Assn a b) =  cPrint a ++ " = " ++  (cPrint b) ++ ";"
+    cPrint (IdStmt a) = a
+
+instance CPrint (Id a) where
+    cPrint (Val s  t) = s 
+
+instance CPrint BinOp where
+    cPrint Add = "+"
+    cPrint Multiply = "*"
+    cPrint Subtract = "-"
+    cPrint Divide = "/"
 
 typeCheckProgram::M.Map (Id ()) Type->Program ()->Either SemError (Program Type) 
 typeCheckProgram m (Program decList stList) = 
     do
         typeCheckDecList decList 
         case typeCheckStmtList m stList of 
-            Left e -> Left (CheckError "Didn't TypeCheck Properly")
+            Left e -> Left e
             Right r -> Right $ Program decList r
 
 --checks to see if an entire list has any redeclarations
@@ -316,7 +350,7 @@ typeCheckDecList dl =
     do
         let l = map (\(Dec i t)-> i) dl 
         let x = filter ((>1) . length) $ group l
-        if ((length x) >1) then Right () else Left ( ReDecs "Redeclaration Error")
+        if ((length x) <= 1) then Right () else Left ( ReDecs "Redeclaration Error")
 
 typeCheckStmtList::M.Map (Id ()) Type->[Stmt ()]->Either SemError [Stmt Type] 
 typeCheckStmtList m x = mapM (typeCheckStmt m) x 
@@ -341,7 +375,7 @@ typeCheckStmt m (If a b) = do
         if getTypeFrom l == IntType 
             then do 
                 t <- (typeCheckStmtList m b)
-                Right  $(If l t)
+                Right  $ (If l t)
             else Left $ CheckError "Error in If Statement Types"
 
 
@@ -368,15 +402,20 @@ typeCheckStmt m (Read a) = do
         Just t -> Right $ Read $ fmap (const t) a
         Nothing -> Left $ CheckError "Error in Read"
 
-
 typeCheckStmt m (Print a) = do
     l <- (typeCheckExpr m a)
     Right $ (Print l)  
 
-
 getTypeFrom::(Expr Type)->Type
-getTypeFrom = undefined
+--getTypeFrom = undefined
+getTypeFrom (Var a _) = a
+getTypeFrom (IntConst a _) = a
+getTypeFrom (FloatConst a _) = a
+getTypeFrom (StringEx a _) = a
+getTypeFrom (Neg _ a) = getTypeFrom a
+getTypeFrom (Binary a _ _ _) = a
 
+--data Expr a = Var a String  | IntConst a Integer| FloatConst a Double | Binary a BinOp (Expr a) (Expr a) | Neg a (Expr a)| StringEx  a String deriving(Eq,Show)
 
 typeCheckExpr::M.Map (Id ()) Type->Expr ()->Either SemError (Expr Type)
 typeCheckExpr m (Var _ a) =  do 
@@ -432,6 +471,32 @@ getTypeROp (Subtract) StringType = [StringType]
 
 --Want to make sure types match up.
 --typeCheckStmt m (IdStmt a) = --if the type of the id and the stmt are the same 
+
+parseString :: String -> (Program ())
+parseString str =
+  case parse (miniParser  <* eof) "" str of
+    Left e  -> error $ show e
+    Right r ->  r 
+
+parseFile :: String -> IO () 
+parseFile file =
+  do program  <- readFile file
+     case parse (miniParser <* eof) file program   of
+       Left e -> do putStrLn "Invalid" >> print e 
+       Right r -> do putStrLn "Valid" >> print r
+
+parseFileAndCheck :: String -> IO (Program Type) 
+parseFileAndCheck file =
+  do program  <- readFile file
+     case parse (miniParser <* eof) file program   of
+       Left e -> fail "ERROR PARSING" 
+       Right r -> typeCheck r file
+
+cPrettyPrinter::(Program Type)->IO ()
+cPrettyPrinter a = do
+        print $ cPrint a
+
+--data Program a = Program [Decl] [Stmt a] deriving(Eq,Show)
 symAdd::Decl->AssocMap
 symAdd (Dec a b) = AssocMap(a,b)
 
@@ -443,12 +508,11 @@ typeCheck (Program a b) fileName =
         let assocMapList = map symAdd a --list of map 
         let m = map pretty assocMapList
         let am = M.fromList $ map (\(AssocMap(c,d))->(Val c (), d)) assocMapList 
-        --Create map here
         let c = typeCheckProgram am (Program a b)
         hPutStr handle $ concat m 
         hClose handle
         case c of
-            Right c -> return c
+            Right c -> (cPrettyPrinter c) >>  return c --feed C into the cTypeChecker
             Left e-> case e of 
                 (CheckError e) -> putStrLn  e >> exitFailure --TODO: EXIT ON FAILURE 
                 (IncompatibleTypes e) -> putStrLn  e >> exitFailure --TODO: EXIT ON FAILURE 
@@ -458,3 +522,8 @@ typeCheck (Program a b) fileName =
 main = do 
     (arg:_) <- getArgs 
     parseFile arg
+
+
+--TODO:
+--pretty print for files
+--cprint for files
