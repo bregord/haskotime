@@ -224,18 +224,13 @@ stringParser =
         char '"'
         return $ str
 
---generate c code
 term::Parser (Expr ()) 
 term = parens expression  
     <|>liftM2 Var (pure ()) identifier
     <|> try ( liftM2 FloatConst (pure ()) floatParser) 
     <|> try (liftM2 IntConst (pure ()) integerParser)
     <|> liftM2 StringEx (pure ()) stringParser
-    -- <|> liftM FloatConst float --FloatConst Double 
-    --get as a list of numbers, and just zip with increasing powers of 10 to actually make it a number
 
-
---Pretty Printer
 class PrettyPrint a where
     prettyPrint::a->String
 
@@ -263,7 +258,6 @@ instance PrettyPrint (Stmt u) where
 instance PrettyPrint (Id a) where
     prettyPrint (Val s  _) = s 
 
-
 instance PrettyPrint a => (PrettyPrint [a]) where
     prettyPrint a = concat $ map prettyPrint a
 
@@ -287,8 +281,6 @@ instance PrettyPrint (Program u) where
 
 instance PrettyPrint AssocMap where
     prettyPrint (AssocMap (a, b)) = a ++ ":" ++ (prettyPrint b) ++ "\n" 
-
-
 
 getDecorator::Type->String
 getDecorator (FloatType) = "%f"
@@ -391,8 +383,8 @@ typeCheckProgram::M.Map (Id ()) Type->Program ()->Either SemError (Program Type)
 typeCheckProgram m (Program decList stList) = 
     do
         typeCheckDecList decList 
+        
         case typeCheckStmtList m stList of 
-            Left e -> Left e
             Right r -> Right $ Program decList r
 
 --checks to see if an entire list has any redeclarations
@@ -400,8 +392,8 @@ typeCheckDecList::[Decl]->Either SemError ()
 typeCheckDecList dl = 
     do
         let l = map (\(Dec i t)-> i) dl 
-        let x = filter ((>1) . length) $ group l
-        if ((length x) <= 1) then Right () else Left ( ReDecs "Redeclaration Error")
+        let x = filter ((>1) . length) $ group $ sort l
+        if (null x) then Right () else Left ( ReDecs "Redeclaration Error")
 
 typeCheckStmtList::M.Map (Id ()) Type->[Stmt ()]->Either SemError [Stmt Type] 
 typeCheckStmtList m x = mapM (typeCheckStmt m) x 
@@ -415,11 +407,6 @@ typeCheckStmt m (Assn a b) = case  M.lookup a m  of
             then Right (Assn (fmap (const t) a) l) 
                 else Left $ CheckError "Error in Assignment Statement Types"  
     Nothing ->  Left $ CheckError "Error in Assignment Statement Types"  
-
---CHEK THAT THE THING I'M ASSIGNING TO IS THE THING I'M ASSIGNING OF
---check that I am assigning value of expression to an ID
---Expr type has to match id type FUCK FUCK FUCK
---PAtTERN MATCH
 
 typeCheckStmt m (If a b) = do 
         l <- (typeCheckExpr m a) 
@@ -546,8 +533,6 @@ cPrettyPrinter fileName a = do
         hPutStr handle (cPrint a)
         hClose handle
 
-
---data Program a = Program [Decl] [Stmt a] deriving(Eq,Show)
 symAdd::Decl->AssocMap
 symAdd (Dec a b) = AssocMap(a,b)
 
@@ -558,11 +543,10 @@ typeCheck (Program a b) fileName = do
         let m = map pretty assocMapList
         let am = M.fromList $ map (\(AssocMap(c,d))->(Val c (), d)) assocMapList 
         let c = typeCheckProgram am (Program a b)
-        --writeFile fileName $ concat m
         hPutStr handle $ concat m 
         hClose handle
         case c of
-            Right c -> (cPrettyPrinter fileName c) >>return c --feed C into the cTypeChecker
+            Right c -> (cPrettyPrinter fileName c) >> putStrLn "SUCCESS" >>return c --feed C into the cTypeChecker
             Left e-> case e of 
                 (CheckError e) -> putStrLn  e >> exitFailure --TODO: EXIT ON FAILURE 
                 (IncompatibleTypes e) -> putStrLn  e >> exitFailure --TODO: EXIT ON FAILURE 
@@ -571,12 +555,4 @@ typeCheck (Program a b) fileName = do
 
 main = do 
     (arg:_) <- getArgs 
-    parseFile arg
-
-
---TODO:
---pretty print for files
---cprint for files
---
---string reverse
-
+    parseFileAndCheck arg

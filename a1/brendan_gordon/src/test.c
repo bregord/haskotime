@@ -26,6 +26,7 @@ int x;
 float y;
 char* z;
 char* w;
+int u;
 
 if (x){
 y = 1.0;

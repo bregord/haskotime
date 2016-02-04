@@ -2,3 +2,5 @@ x:int
 y:float
 z:string
 w:string
+u:int
+u:float
