@@ -1,0 +1,19 @@
+var x:int;
+var y:int;
+var z:int;
+var z1:float;
+var z2:float;
+var z3:string;
+
+z1 = z2/z;
+x = y;
+y = z2;
+# Assignment of Int to Float should fail.
+z2 = y;
+read z3;
+
+
+
+
+ 
+

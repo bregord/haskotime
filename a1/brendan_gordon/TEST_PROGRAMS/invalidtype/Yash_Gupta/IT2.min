@@ -1,0 +1,12 @@
+var x:int;
+var y:float;
+var z:int;
+var z_:string;
+# Int to String Type-Casting not allowed.
+z_ = x + z;
+print z;
+
+
+
+
+

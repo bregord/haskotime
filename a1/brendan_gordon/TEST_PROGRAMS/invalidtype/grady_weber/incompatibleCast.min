@@ -1,0 +1,6 @@
+#incompatible cast
+var x : int;
+var y : float;
+y = 3.14;
+x = y;
+

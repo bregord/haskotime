@@ -1,0 +1,4 @@
+# This program is invalid as the expression do not support string + int
+
+print "string" + 3;
+

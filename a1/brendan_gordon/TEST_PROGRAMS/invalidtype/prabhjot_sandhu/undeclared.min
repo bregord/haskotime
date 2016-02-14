@@ -1,0 +1,9 @@
+var x:int;
+var y:int;
+
+read x;
+read y;
+
+z = x + y;
+print z;
+

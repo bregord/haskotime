@@ -1,0 +1,4 @@
+var a: int;
+
+print "allo" - 1;
+

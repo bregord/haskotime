@@ -1,0 +1,10 @@
+# Cannot divide or multiple two strings
+var st1: string;
+var st2: string;
+var r: string;
+
+st1 = "string1";
+st2 = "string2";
+
+r = st1 * st2;
+

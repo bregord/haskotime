@@ -1,0 +1,4 @@
+var test : float;
+var test : int;
+
+#redeclaration

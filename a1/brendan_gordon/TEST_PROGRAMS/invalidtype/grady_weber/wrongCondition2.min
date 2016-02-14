@@ -1,0 +1,7 @@
+#wrong condition2
+var x : float;
+x = 3.14;
+while x do
+    x = x + 1.0;
+done
+

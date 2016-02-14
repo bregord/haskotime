@@ -1,0 +1,9 @@
+# operation between incompatible types
+
+var x: int;
+var y: string;
+
+y = y + x;
+
+print y;
+

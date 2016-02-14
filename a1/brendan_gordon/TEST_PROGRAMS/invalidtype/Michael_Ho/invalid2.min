@@ -1,0 +1,10 @@
+# Int addition op with floats
+
+var a : int;
+var b : float;
+
+b = 4.0;
+
+a = b + 5.0;
+
+

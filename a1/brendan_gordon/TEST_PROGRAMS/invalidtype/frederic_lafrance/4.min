@@ -1,0 +1,5 @@
+# Undeclared variable, both sides of an assignment
+var y: int;
+y = x;
+z = y;
+

@@ -1,0 +1,4 @@
+var a: float;
+a = 2 + 2.0;
+a = 2 + "hello";
+a = 5;

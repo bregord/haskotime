@@ -1,0 +1,7 @@
+var x : float;
+x = 1.0;
+
+if x then
+    print "This should never have been allowed";
+endif
+

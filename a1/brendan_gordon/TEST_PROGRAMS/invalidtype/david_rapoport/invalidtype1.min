@@ -1,0 +1,6 @@
+# Can't add ints and string
+
+var x : int ;
+var y : string;
+
+print x*x+y;

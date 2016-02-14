@@ -1,0 +1,11 @@
+# Reads from user first name and last name
+# Prints back concat of names
+# Tries to concat a string with an int
+var first: string;
+var last: int;
+
+print "Please enter your first name";
+read first;
+print "Please enter your last naem";
+read last;
+print "Hello " + first + " " + last + "!";

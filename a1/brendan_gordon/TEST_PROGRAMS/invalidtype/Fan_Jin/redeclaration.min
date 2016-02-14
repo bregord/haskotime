@@ -1,0 +1,6 @@
+# This program is invalid as x is redeclared
+
+var x: int;
+var y: int;
+var x: float;
+

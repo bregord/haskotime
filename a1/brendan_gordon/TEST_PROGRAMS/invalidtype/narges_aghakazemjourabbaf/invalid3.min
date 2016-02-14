@@ -1,0 +1,4 @@
+var a: string;
+
+a = 1;
+

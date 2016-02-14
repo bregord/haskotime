@@ -1,0 +1,6 @@
+# invalid expression of string + int
+var s: string;
+var i: int;
+
+print s + i;
+

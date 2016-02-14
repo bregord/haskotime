@@ -1,0 +1,8 @@
+#float in while
+
+var x : float;
+
+while x do
+
+done
+

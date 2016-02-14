@@ -1,0 +1,8 @@
+var x: float;
+var y: float;
+var z: int;
+
+if y then x = y+z; endif
+
+
+

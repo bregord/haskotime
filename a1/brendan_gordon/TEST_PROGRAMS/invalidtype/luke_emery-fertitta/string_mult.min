@@ -1,0 +1,6 @@
+# invalid use of binary operator '*'
+
+var x: int;
+var y: string;
+
+x = x * y;

@@ -1,0 +1,3 @@
+var x : string;
+x = "hello" + 1;
+

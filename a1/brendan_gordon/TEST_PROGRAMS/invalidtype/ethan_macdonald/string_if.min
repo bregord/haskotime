@@ -1,0 +1,8 @@
+var s: string;
+
+s = "Hello World";
+
+#Error: String cannot be used as if expression
+if s then
+	s = "Goodbye World";
+endif

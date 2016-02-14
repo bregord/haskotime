@@ -1,0 +1,9 @@
+# assign float to int type error
+
+var _ : float;
+var x : int;
+var y : float;
+var s : string;
+
+x = 2.0;
+

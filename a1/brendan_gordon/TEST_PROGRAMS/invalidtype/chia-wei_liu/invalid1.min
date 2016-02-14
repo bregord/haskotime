@@ -1,0 +1,10 @@
+var x: int;
+var y: float;
+var z: int;
+
+x = 5;
+
+y = 0.63;
+
+z = x+y; #this should give error because assigning float to int
+

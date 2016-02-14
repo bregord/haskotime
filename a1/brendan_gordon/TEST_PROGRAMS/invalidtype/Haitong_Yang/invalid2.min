@@ -1,0 +1,4 @@
+#int plus string
+var x : string;
+x = "foo";
+x = x + 3;

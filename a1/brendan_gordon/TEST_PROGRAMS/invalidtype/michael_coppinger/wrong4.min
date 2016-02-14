@@ -1,0 +1,11 @@
+# Tries to do some stuff with your age
+var age: string;
+
+print "What is your age?";
+read age;
+age = age + 100;
+print "In a hundred years you will be";
+print age;
+print "years old!";
+print "Your backwards age is";
+print -age;

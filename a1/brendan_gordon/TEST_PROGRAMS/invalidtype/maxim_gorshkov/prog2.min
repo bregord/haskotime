@@ -1,0 +1,5 @@
+# Using a variable which is not declared
+
+var x : int;
+
+print z;

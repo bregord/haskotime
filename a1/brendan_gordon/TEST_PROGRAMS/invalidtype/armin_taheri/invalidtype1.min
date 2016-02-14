@@ -1,0 +1,2 @@
+print "This should" + --3 - "not print";
+

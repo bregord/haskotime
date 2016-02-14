@@ -1,0 +1,11 @@
+# assign a float to a string id type error 
+
+
+var x : int;
+var y : float;
+var s : string;
+
+y = 12.3;
+x = 1;
+s = y + (x + 3);  
+

@@ -1,0 +1,32 @@
+var n: int;
+var t: int;
+var s1: string;
+var s2: string;
+
+read n;
+s1 = "";
+
+# Upper edge
+t = n;
+while t do
+  s1 = s1 + ".";
+  t = t - 1;
+done
+
+print s1;
+
+s2 = ".";
+t = n - 2;
+while t do
+  s2 = s2 + " ";
+  t = t - 1;
+done
+s2 = s2 + ".";
+
+t = n - 2;
+while t do
+  print s2;
+  t = t - 1;
+done
+
+print s1;

@@ -1,0 +1,6 @@
+var x : string;
+
+x = "hi";
+
+if x then
+endif

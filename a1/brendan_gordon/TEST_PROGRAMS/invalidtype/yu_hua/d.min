@@ -1,0 +1,11 @@
+var x: string;
+var y: string;
+
+x = "haha";
+y = "haha";
+
+if x - y then
+    y = x;
+endif
+
+

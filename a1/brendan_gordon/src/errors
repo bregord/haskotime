@@ -1,6 +1,0 @@
-[1 of 1] Compiling Main             ( MiniParser.hs, MiniParser.o )
-
-MiniParser.hs:11:1: Warning:
-    Module ‘Control.Monad.Error’ is deprecated:
-      Use Control.Monad.Except instead
-Linking MiniParser ...

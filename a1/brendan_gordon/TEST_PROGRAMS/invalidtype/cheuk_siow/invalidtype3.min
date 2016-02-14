@@ -1,0 +1,8 @@
+# Invalid type program 3: redeclare variable.
+
+var x: int;
+var x: float;
+
+x = 10;
+y = 1.0;
+

@@ -1,0 +1,4 @@
+var x : string;
+var y : float;
+
+print x + y;

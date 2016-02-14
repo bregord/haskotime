@@ -1,0 +1,5 @@
+var x: int;
+var y: float;
+
+print x + y + z;
+

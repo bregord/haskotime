@@ -1,0 +1,9 @@
+var input: float;
+
+read input;
+
+print input;
+
+print -input;
+
+print "" - input;

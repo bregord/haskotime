@@ -1,0 +1,5 @@
+# same var declared twice
+var x: int;
+var x: string;
+x = 2;
+

@@ -1,0 +1,6 @@
+var printf : string;
+var a : int;
+var b : int;
+var a__ : float;
+var printf : string;
+

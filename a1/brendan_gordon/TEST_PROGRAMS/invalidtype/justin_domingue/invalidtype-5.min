@@ -1,0 +1,11 @@
+# Invalid 5
+
+var cond: float;
+
+cond = 5.0;
+
+if cond then  #condition cannot be float
+  print "This should not be printed...";
+endif
+
+

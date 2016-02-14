@@ -1,0 +1,15 @@
+# This minilang program uses a bad if condition
+
+var x: int;
+var y: int;
+var z: string;
+
+x = 1;
+y = 50;
+z = "";
+
+if z then
+    x = y*y;
+endif
+
+

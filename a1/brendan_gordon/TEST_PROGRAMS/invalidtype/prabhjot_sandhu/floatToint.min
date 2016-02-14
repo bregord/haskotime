@@ -1,0 +1,10 @@
+var x:int;
+var y:float;
+var z:int;
+
+read x;
+read y;
+
+z = x + y;
+print z;
+

@@ -1,0 +1,7 @@
+# If the expression is not an implicit int, not a valid program
+
+var x : int;
+
+if 12.2 then
+	x = x + 1;
+endif

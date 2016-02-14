@@ -1,0 +1,4 @@
+# invalid string operation
+var s: string;
+s = s / s;
+

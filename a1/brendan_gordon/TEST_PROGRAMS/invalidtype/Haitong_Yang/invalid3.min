@@ -1,0 +1,3 @@
+#variable redeclared
+var x : int;
+var x : string;

@@ -1,0 +1,6 @@
+# Condition is not an int since y extends the entire expression to float type.
+
+var x: int;
+var y: float;
+
+if (x + x) / (x + y) then endif

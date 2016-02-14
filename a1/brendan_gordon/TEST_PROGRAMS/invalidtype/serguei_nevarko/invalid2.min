@@ -1,0 +1,6 @@
+var x : string;
+
+x = 57.4;
+
+print x;
+

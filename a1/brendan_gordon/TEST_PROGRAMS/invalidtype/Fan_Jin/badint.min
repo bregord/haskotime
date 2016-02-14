@@ -1,0 +1,9 @@
+# This program is invalid as float cannot be downcasted to int for assignment
+
+var x: int;
+var y: float;
+
+x = 3;
+y = 2;
+x = x / y;
+

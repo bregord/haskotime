@@ -1,0 +1,17 @@
+# Tries to make a shopping list for the user
+# Forgets to declare a variable
+var itemName: string;
+var price: float;
+
+print "How many items do you want to buy?";
+read numItems;
+
+while numItems do
+	print "What is the name of the item?";
+	read itemName;
+	print "What is the price of the item?";
+	read price;
+	print "The item is " + itemName + " the price is";
+	print price;
+	numItems = numItems - 1;
+done

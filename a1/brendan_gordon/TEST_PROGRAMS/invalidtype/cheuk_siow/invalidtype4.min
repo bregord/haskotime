@@ -1,0 +1,10 @@
+# Invalid type program 4: multiply int and float then store to int.
+
+var x: int;
+var y: float;
+var z: int;
+
+x = 10;
+y = 1.0;
+z = x * y;
+

@@ -1,0 +1,12 @@
+# Must use an int for a condition
+
+var x : float;
+var y : string;
+
+if x then
+read x;
+endif
+
+while y do
+print y;
+done

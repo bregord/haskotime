@@ -1,0 +1,6 @@
+# Can't assign float to int (expression extends to float).
+
+var x: int;
+var y: float;
+
+x = x + y;

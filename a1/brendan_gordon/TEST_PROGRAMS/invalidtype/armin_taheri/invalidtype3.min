@@ -1,0 +1,8 @@
+var x: int;
+var y: float;
+
+y = 3.0/2 + 4;
+x = y;
+
+read y;
+

@@ -1,0 +1,8 @@
+#put float in if
+
+var x : float;
+
+if x then
+	
+endif
+

@@ -1,0 +1,5 @@
+# Can't declare a variable twice, even if it's the same type.
+
+var x: int;
+var x: int;
+

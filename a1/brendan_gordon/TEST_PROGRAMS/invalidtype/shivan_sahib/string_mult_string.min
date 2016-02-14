@@ -1,0 +1,9 @@
+var x : string;
+var y : string;
+var z : string;
+
+read x;
+read y;
+z = x * y;
+
+

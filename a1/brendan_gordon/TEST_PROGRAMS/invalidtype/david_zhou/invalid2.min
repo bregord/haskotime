@@ -1,0 +1,6 @@
+# assigning to an undeclared variable
+
+var x: int;
+
+y = 3;
+

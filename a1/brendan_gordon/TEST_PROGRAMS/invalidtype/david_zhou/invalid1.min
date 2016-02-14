@@ -1,0 +1,6 @@
+# variable redeclaration
+
+var x: int;
+var y: float;
+var x: int;
+

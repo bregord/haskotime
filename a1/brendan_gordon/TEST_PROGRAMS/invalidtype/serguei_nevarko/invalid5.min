@@ -1,0 +1,8 @@
+var y : string;
+
+y = "invalid";
+
+while y do
+  print y;
+done
+

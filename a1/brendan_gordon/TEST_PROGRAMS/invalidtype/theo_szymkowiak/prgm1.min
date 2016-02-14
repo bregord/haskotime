@@ -1,0 +1,10 @@
+# Cannot add a string and a int
+var x: int;
+var y: string;
+var r: int;
+
+x = 2;
+y = "test";
+
+r = x + y;
+

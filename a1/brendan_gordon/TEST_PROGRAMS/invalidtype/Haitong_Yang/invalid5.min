@@ -1,0 +1,4 @@
+# invalid if condition
+var x : int;
+if("true") then x = 2;
+endif

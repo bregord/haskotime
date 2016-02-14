@@ -1,0 +1,10 @@
+# Cannot store float/float into int
+var a: int;
+var b: float;
+var c: float;
+
+b = 2.0;
+c = 3.0;
+
+a = b / c;
+

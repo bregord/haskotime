@@ -1,0 +1,10 @@
+# Float addition op with int and string
+
+var a : int;
+var b : string;
+var c : float;
+
+a = 1337;
+b = "This is a string";
+
+c = a + b;

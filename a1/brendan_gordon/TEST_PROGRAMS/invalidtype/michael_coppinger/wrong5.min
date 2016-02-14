@@ -1,0 +1,26 @@
+# tries to concat int and string
+
+var secret : int;
+var tries : int;
+var answer : int;
+var result : int;
+
+secret = 34;
+tries = 5;
+
+while tries do
+    print "Guess my secret number between 1 and 50?";
+    read answer;
+    if secret - answer then
+        print "Wrong! Guess again.";
+        tries = tries - 1;
+        print tries + "tries left.";
+        if tries then
+        else
+            print "You Lose!";
+        endif
+    else # If secret - answer = 0
+        tries = 0;
+        print "You Win!";
+    endif
+done

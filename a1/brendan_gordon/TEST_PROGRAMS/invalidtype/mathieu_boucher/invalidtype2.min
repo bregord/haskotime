@@ -1,0 +1,8 @@
+#string in if statment
+
+var x : string;
+
+if x then
+	x = "hello";
+endif
+

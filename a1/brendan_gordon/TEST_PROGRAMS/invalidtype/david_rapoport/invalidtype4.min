@@ -1,0 +1,6 @@
+# can't redeclare variables
+
+var x : int;
+var x : int;
+
+print x;

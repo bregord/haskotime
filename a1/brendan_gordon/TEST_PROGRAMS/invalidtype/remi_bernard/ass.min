@@ -1,0 +1,4 @@
+# assignemnt with incorrect type
+var x: int;
+x = x + 2.0;
+

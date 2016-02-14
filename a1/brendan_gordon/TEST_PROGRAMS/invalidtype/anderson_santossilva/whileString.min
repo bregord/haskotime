@@ -1,0 +1,4 @@
+while "hello" do
+	print "Hello";
+done
+

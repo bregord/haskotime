@@ -1,0 +1,10 @@
+var test: float;
+var test1: int;
+
+test = test1; #valid
+
+test = test + test;
+
+
+test1 = test; #invalid
+

@@ -1,0 +1,5 @@
+# invalid assignment of float to int
+
+var x : int;
+var y : float;
+x = y; # should fail due to type error, not lack of initialization

@@ -1,0 +1,4 @@
+# Error type: undefined variable 'y'
+var x : int;
+x = y + 10;
+

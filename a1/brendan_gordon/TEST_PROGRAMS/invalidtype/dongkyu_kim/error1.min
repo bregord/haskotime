@@ -1,0 +1,9 @@
+# initialization of a variable error
+
+var x: int;
+var y: int;
+
+x = 4;
+y = "hello";
+
+

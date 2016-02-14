@@ -1,0 +1,7 @@
+# Assignment of string to variable of type float
+
+var a : float;
+
+a = "This is a string";
+
+

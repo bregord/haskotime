@@ -1,0 +1,13 @@
+var x:int;
+var y:int;
+var z:float;
+
+read x;
+read y;
+z = x + y;
+
+while z do
+z = z - 1;
+print z;
+done
+

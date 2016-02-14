@@ -1,0 +1,5 @@
+# type mismatch
+
+var y: string;
+
+y = -"hello" + 3;

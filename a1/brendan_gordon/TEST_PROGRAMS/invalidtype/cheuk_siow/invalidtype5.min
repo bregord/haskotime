@@ -1,0 +1,10 @@
+# Invalid type program 5: add string with float.
+
+var x: string;
+var y: float;
+var z: string;
+
+x = "10";
+y = 1.0;
+z = x + y;
+

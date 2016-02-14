@@ -1,0 +1,4 @@
+# Redeclaring a variable
+
+var x : int;
+var x : string;

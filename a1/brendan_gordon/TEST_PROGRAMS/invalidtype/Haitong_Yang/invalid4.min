@@ -1,0 +1,3 @@
+#undeclared var
+var x : int;
+x = x + y;

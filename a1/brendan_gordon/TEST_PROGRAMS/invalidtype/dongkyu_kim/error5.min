@@ -1,0 +1,10 @@
+# incompatible operation between two strings
+
+var x: string;
+var y: string;
+var z: string;
+
+z = x * y;
+
+print z;
+

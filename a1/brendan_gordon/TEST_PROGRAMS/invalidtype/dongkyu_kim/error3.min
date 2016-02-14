@@ -1,0 +1,10 @@
+# using variable of invalid type in condition
+
+var x: string;
+var y: int;
+
+while x do
+    y = 3;
+done
+
+

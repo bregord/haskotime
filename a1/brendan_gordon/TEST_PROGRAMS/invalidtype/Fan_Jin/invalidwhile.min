@@ -1,0 +1,8 @@
+# This program is invalid as the predicate for iteration can only be of type int
+
+var x: float;
+
+while x do
+
+done
+

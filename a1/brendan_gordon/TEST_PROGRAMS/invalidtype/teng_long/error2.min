@@ -1,0 +1,4 @@
+# Error type: float-type '*' string-type
+var x : float;
+x = 10.0 * "10.0";
+

@@ -1,0 +1,4 @@
+# Error type: assign float to int variable 'x'
+var x : int;
+x = 10.0;
+

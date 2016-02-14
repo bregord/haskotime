@@ -1,0 +1,5 @@
+# Using an incorrect type with a variable
+
+var x : int;
+
+x = 3.0;

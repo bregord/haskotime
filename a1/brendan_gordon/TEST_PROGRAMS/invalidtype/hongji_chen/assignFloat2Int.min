@@ -1,0 +1,7 @@
+var x : int;
+var y : float;
+
+y = 10.;
+
+x = y;
+print x;

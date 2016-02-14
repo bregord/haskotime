@@ -1,0 +1,7 @@
+#wrong condition1
+var x : string;
+x = "STRINGBOY2000";
+if x then
+    x = x + "000";
+endif
+

@@ -26,7 +26,7 @@ data Decl = DecSeq [Decl] | Dec String Type  deriving(Eq,Show)
 
 data Stmt a = Seq [Stmt a] | If (Expr a) [Stmt a]| IfElse (Expr a) [Stmt a] [Stmt a]| While (Expr a) [Stmt a] | Read (Id a)| Print (Expr a)|IdStmt String| Assn (Id a) (Expr a) deriving(Eq,Show)
 
-data Expr a = Var a String  | IntConst a Integer| FloatConst a Double | Binary a BinOp (Expr a) (Expr a) | Neg a (Expr a)| StringEx  a String deriving(Eq,Show)
+data Expr a = Var a String  | IntConst a Integer| FloatConst a Double | Binary a BinOp (Expr a) (Expr a) | Neg a (Expr a)| StringEx  a String  deriving(Eq,Show)
 
 data Type = FloatType| IntType | StringType | Void deriving (Eq,Show)
 
@@ -80,6 +80,7 @@ colon       =Token.colon       lexer
 whiteSpace = Token.whiteSpace lexer -- parses whitespace
 parens = Token.parens lexer
 dot = Token.dot lexer
+lexeme = Token.lexeme lexer
 
 miniParser:: Parser (Program ())
 miniParser = 
@@ -195,9 +196,10 @@ operators = [ [Prefix (reservedOp "-" >> return (Neg ()            ))          ]
              , [Infix  (reservedOp "+"   >> return (Binary () Add     )) AssocLeft,
                 Infix  (reservedOp "-"   >> return (Binary () Subtract)) AssocLeft]
               ]
+--lexeme p = p <* many space 
 
 floatParser:: Parser Double 
-floatParser = 
+floatParser = lexeme $ 
     do
         pre <- many digit
         dot
@@ -209,7 +211,7 @@ floatParser =
             (n,m) -> if (head n) == '0' && (length n) > 1 then fail "0 error" else return $ (read $ (n ++ "." ++  m)) --map show over both lists. Then concatenate it and read it.
 
 integerParser:: Parser Integer
-integerParser = 
+integerParser = lexeme $ 
     do
         num <-many digit
         if (head num) == '0' && (length num) > 1 then fail "0 error"  else return $ read num
@@ -217,7 +219,7 @@ integerParser =
 letters = ['0'..'9']++['a'..'z']++['A'..'Z']++[',','.','!','!',' ']
 
 stringParser:: Parser String
-stringParser = 
+stringParser = lexeme $ 
     do
         char '"'
         str <- many $ oneOf letters 
@@ -225,9 +227,9 @@ stringParser =
         return $ str
 
 term::Parser (Expr ()) 
-term = parens expression  
-    <|>liftM2 Var (pure ()) identifier
-    <|> try ( liftM2 FloatConst (pure ()) floatParser) 
+term = try (parens expression)  
+    <|>try (liftM2 Var (pure ()) identifier)
+    <|> try (liftM2 FloatConst (pure ()) floatParser) 
     <|> try (liftM2 IntConst (pure ()) integerParser)
     <|> liftM2 StringEx (pure ()) stringParser
 
@@ -383,11 +385,10 @@ typeCheckProgram::M.Map (Id ()) Type->Program ()->Either SemError (Program Type)
 typeCheckProgram m (Program decList stList) = 
     do
         typeCheckDecList decList 
-        
-        case typeCheckStmtList m stList of 
-            Right r -> Right $ Program decList r
+        r <-typeCheckStmtList m stList
+        pure $ (Program decList r)
+        ---checks to see if an entire list has any redeclarations
 
---checks to see if an entire list has any redeclarations
 typeCheckDecList::[Decl]->Either SemError () 
 typeCheckDecList dl = 
     do
@@ -524,7 +525,11 @@ parseFileAndCheck :: String -> IO (Program Type)
 parseFileAndCheck file =
   do program  <- readFile file
      case parse (miniParser <* eof) file program   of
-       Left e -> fail "ERROR PARSING" 
+       Left e ->
+        do 
+            putStrLn "ERROR PARSING" 
+            print e 
+            exitFailure
        Right r -> typeCheck r file
 
 cPrettyPrinter::String->(Program Type)->IO ()

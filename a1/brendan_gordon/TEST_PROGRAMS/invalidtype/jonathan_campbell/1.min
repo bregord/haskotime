@@ -1,0 +1,5 @@
+var s: string;
+var x: int;
+var y: int;
+
+y = x + s;

@@ -1,0 +1,6 @@
+# this script tests that the print function properly type checks
+
+var x: string;
+var y: float;
+
+print x - y;

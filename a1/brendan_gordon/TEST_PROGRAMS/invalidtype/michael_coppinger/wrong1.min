@@ -1,0 +1,12 @@
+# Annoying Program
+# Reads int from user and prints hello back that many times * 100
+# tries to put a float in a while loop
+var x: float;
+
+print "Please enter an integer kappa.";
+read x;
+
+while x do
+	print "hello";
+	x = x-1;
+done

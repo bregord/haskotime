@@ -1,0 +1,4 @@
+# unknown variable
+var s: int;
+s = s + (S - s / 2);
+

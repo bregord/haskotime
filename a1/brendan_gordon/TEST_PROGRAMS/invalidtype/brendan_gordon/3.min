@@ -1,0 +1,5 @@
+var z: string;
+var y: string;
+
+y = z * y;
+

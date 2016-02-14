@@ -1,0 +1,6 @@
+var y : float;
+
+x = 57.4;
+
+print x;
+

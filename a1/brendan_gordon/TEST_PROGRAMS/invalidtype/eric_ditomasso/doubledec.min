@@ -1,0 +1,5 @@
+# this script tests declaring a variable twice
+var x: int;
+var x: float;
+var xs: int;
+var xa: string;

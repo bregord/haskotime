@@ -1,0 +1,15 @@
+# This invalid program incorrectly assigns variables to values of the wrong type
+
+var x: int;
+var y: int;
+var z: float;
+var s: string;
+
+x = "This is not an int";
+y = 10.0; 
+z = 10;
+s = 20;
+
+print x;
+print s; 
+

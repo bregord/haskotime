@@ -1,0 +1,9 @@
+var i : int;
+var l : float;
+
+l = l + i;
+
+while l do
+  l = l - 1.0;
+done
+

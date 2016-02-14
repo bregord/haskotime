@@ -1,0 +1,7 @@
+var s : string;
+
+read x;
+
+s = 1;
+t = 5;
+

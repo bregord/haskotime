@@ -1,0 +1,7 @@
+# Can't add integers and strings
+
+var x: string;
+var y: int;
+
+x = x + y;
+

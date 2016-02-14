@@ -1,0 +1,27 @@
+var x:string;
+var y:int;
+var z:float;
+var z:int;
+x=-20;
+read y;
+y=x-17.18;print y;
+if y then y = 9.8 - (9.1+17.3); else if x then y = 0.0012; endif endif
+print y;
+print x;
+while y do 
+read y; # In between Comment
+y = y-20.7;
+while x do 
+print y;
+x = x+10203;
+y = y-.00034;
+print x;
+print y;
+read y;
+y = y-340.-0.0+0.000;
+done
+done
+print x;
+#Comment1
+# COMMENT 2 YAYAYAYA ! ! ! ! HUHU
+

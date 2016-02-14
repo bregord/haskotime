@@ -1,0 +1,8 @@
+# Assignment of string to variable of type int
+
+var a : int;
+var b : string;
+
+b = "hello";
+
+a = b;

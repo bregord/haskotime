@@ -1,0 +1,8 @@
+var t : string;
+var x : float;
+var y : int;
+
+y = t * x;
+
+print y;
+

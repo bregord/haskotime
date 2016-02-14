@@ -1,0 +1,5 @@
+var s: string;
+
+while s do
+	s = s + 1;
+done

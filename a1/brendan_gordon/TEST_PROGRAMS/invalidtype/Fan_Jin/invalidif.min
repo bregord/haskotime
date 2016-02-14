@@ -1,0 +1,8 @@
+# This program is invalid as the predicate for conditional can only be of type int
+
+var x: float;
+
+if x then
+
+endif
+

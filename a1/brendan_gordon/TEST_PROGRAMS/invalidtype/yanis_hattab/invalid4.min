@@ -1,0 +1,14 @@
+#using a string as a while condition type error
+
+
+var x : int;
+var y : float;
+var s : string;
+
+s = "error";
+
+while (s) do
+	y = 23.5;
+done
+
+

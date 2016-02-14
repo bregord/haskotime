@@ -1,0 +1,6 @@
+var s: string;
+read s;
+
+print -s;
+print s+s;
+print s-s;

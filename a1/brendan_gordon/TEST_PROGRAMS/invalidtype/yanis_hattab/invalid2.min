@@ -1,0 +1,9 @@
+#assign string to float type error
+
+
+var x : int;
+var y : float;
+var s : string;
+
+y = "test";
+

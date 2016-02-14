@@ -1,0 +1,5 @@
+# Can't use uninitialized vars
+
+var x : string;
+
+print x + four;

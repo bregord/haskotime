@@ -1,0 +1,10 @@
+var x : float;
+
+x = 1.0;
+
+while x do
+    x = x + 1;
+done
+
+print x;
+

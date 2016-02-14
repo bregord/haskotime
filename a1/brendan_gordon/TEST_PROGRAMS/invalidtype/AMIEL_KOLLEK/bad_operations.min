@@ -1,0 +1,16 @@
+# This invalid program tries to do an invalid binary operation
+
+var x: int;
+var y: float;
+var z: string;
+
+x = 0;
+y = 0.0;
+z = "String";
+
+y = x + y; # OK
+x = x + y; # Error
+z = x + y; # Error
+x = z + y; # Mega error
+
+

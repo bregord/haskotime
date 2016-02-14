@@ -1,0 +1,6 @@
+# times is not defined for string
+
+var y : string;
+var x : string;
+
+print x*y;

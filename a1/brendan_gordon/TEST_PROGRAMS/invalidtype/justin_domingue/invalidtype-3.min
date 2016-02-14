@@ -1,0 +1,10 @@
+# Invalid type 3
+
+var s: string;
+var n: int;
+
+n = 123;
+s = "abc";
+
+s = n + s;  # error
+

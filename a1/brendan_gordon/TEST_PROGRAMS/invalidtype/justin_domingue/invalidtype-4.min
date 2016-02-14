@@ -1,0 +1,8 @@
+# Invalid 4
+# Use undeclared variable
+var y: int;
+var z: string;
+var h: float;
+
+x=1;
+

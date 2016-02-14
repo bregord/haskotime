@@ -1,4 +1,0 @@
-x:int
-y:float
-z:string
-w:string

@@ -1,0 +1,10 @@
+
+var x: float;
+var x: string;
+var y: string;
+
+
+x = "this is not ";
+y = "a valid program";
+
+print -(x + y);

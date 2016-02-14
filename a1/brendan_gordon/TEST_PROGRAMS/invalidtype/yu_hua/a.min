@@ -1,0 +1,7 @@
+var x: int;
+var y: string;
+
+x = 10;
+y = "haha";
+
+print x + y;

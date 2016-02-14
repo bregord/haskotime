@@ -1,0 +1,6 @@
+# Invalid 1
+
+var a: int;
+
+a = 1.0;  # cannot assign FLOAT to INT
+

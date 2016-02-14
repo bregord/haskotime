@@ -1,0 +1,8 @@
+# assign a variable that is not yet declared
+
+var x: int;
+
+x = y;
+
+print x;
+

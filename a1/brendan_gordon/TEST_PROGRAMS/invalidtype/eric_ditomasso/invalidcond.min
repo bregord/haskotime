@@ -1,0 +1,13 @@
+# this script tests using an invalid type in a condition
+
+var x: float;
+var y: int;
+
+read x;
+read y;
+
+if(x+y) then
+	print "This should not be printed";
+else
+	print "This should also not be printed";
+endif

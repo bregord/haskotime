@@ -1,0 +1,10 @@
+# test sending invalid arguments to an operator
+var x:string;
+var y: string;
+var z: float;
+
+x = "x123";
+y = "y123";
+z = 5;
+
+z = z*(x + y);

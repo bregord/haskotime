@@ -1,0 +1,5 @@
+# invalid use of an undeclared variable
+
+var x: int;
+
+x = x + y;

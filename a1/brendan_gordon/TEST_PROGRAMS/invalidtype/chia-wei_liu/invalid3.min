@@ -1,0 +1,7 @@
+var x: int;
+var y: float;
+
+if (x+y) then
+	print x;
+endif
+

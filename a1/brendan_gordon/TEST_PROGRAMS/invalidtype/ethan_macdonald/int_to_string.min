@@ -1,0 +1,5 @@
+var x: int;
+var s: string;
+
+x = 5;
+s = x; #Error: int can't be assigned to string

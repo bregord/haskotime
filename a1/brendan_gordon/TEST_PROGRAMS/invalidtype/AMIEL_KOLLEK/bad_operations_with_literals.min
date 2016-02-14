@@ -1,0 +1,9 @@
+# this minilang program tries to operate poorly on literals
+
+print "" + 0;
+print 0 - "";
+print ""/"test";
+
+
+
+

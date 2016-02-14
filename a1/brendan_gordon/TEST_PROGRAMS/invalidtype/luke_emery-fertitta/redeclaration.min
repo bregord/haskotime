@@ -1,0 +1,4 @@
+# invalid redeclaration of one variable
+
+var x: int;
+var x: float;

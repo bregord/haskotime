@@ -1,0 +1,6 @@
+var x: int;
+var y: string;
+
+x = x /y;
+
+

@@ -1,0 +1,16 @@
+# Invalid type program 1: other types in If expression.
+
+var x: int;
+var y: float;
+var z: string;
+
+x = 10;
+y = 1.0;
+z = "Hello world";
+
+if z then
+    print x;
+else
+    print y;
+endif
+

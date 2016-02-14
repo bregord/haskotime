@@ -1,0 +1,6 @@
+var z:int;
+var z1:float;
+var z2:float;
+# Float to Int Type-Casting not allowed.
+z = z1 + z2;
+

@@ -1,0 +1,3 @@
+#incompatible assignment type
+var x : int;
+x = 3.14;

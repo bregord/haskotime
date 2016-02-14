@@ -1,0 +1,8 @@
+# assigning to an incorrect type
+
+var x: int;
+var y: float;
+
+y = 1.0;
+x = y;
+

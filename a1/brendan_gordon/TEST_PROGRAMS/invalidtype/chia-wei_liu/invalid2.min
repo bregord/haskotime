@@ -1,0 +1,9 @@
+var x: string;
+var y: string;
+var z: int;
+
+z = 0;
+
+z = z + (x + y);
+
+

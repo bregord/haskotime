@@ -1,0 +1,7 @@
+#Error: Can't add strings with ints
+var x: float;
+var s: string;
+
+s = "Hello";
+x = 5;
+s = s + x;

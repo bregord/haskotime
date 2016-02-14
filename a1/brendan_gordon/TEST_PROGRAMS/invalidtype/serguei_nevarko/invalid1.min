@@ -1,0 +1,7 @@
+var x : string;
+var x : float;
+
+x = 57.3;
+
+print x;
+

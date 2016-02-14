@@ -1,0 +1,4 @@
+#  Error type: re-declare variable 'x'
+var x : int;
+var x : float;
+

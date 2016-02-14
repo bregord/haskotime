@@ -1,0 +1,7 @@
+# Invalid type program 2: variable not declared.
+
+var x: int;
+
+x = 10;
+y = 1.0;
+

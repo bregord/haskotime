@@ -1,0 +1,8 @@
+# non-int in while expression
+
+var x : float;
+x = 3; # this is fine, we allow assignment of int to float
+
+while x do
+	print "this should not be reached.";
+done

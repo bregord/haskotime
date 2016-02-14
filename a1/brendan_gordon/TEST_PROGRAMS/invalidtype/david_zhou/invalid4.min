@@ -1,0 +1,11 @@
+# condition not an int
+
+var x: int;
+var y: string;
+
+y = "hello";
+
+if (y) then
+  print "this should fail";
+endif
+
